@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DefaultEcs\DefaultEcs.csproj" />
     <ProjectReference Include="..\MGDFClone.Core\MGDFClone.Core.csproj" />
   </ItemGroup>
 
