@@ -37,6 +37,8 @@ public class MainGame : Game {
         _graphics.ApplyChanges();
         _spriteBatch = new SpriteBatch(_graphics.GraphicsDevice);
         ScreenManager.Instance.ChangeScreen<OverworldScreen>();
+        Globals.Texture = Content.Load<Texture2D>("spritesheet");
+        Globals.Font = Content.Load<SpriteFont>("SDS_8x8");
         base.LoadContent();
     }
 
