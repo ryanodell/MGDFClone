@@ -194,6 +194,23 @@ public class PerlinNoiseV2 {
 
         return perlinNoise;
     }
+    public static int[][] GetOctaveIndices(float[][] perlinNoise, int octaveCount) {
+        int width = perlinNoise.Length;
+        int height = perlinNoise[0].Length;
+
+        int[][] octaveIndices = new int[width][];
+
+        for (int i = 0; i < width; i++) {
+            octaveIndices[i] = new int[height];
+
+            for (int j = 0; j < height; j++) {
+                // Map the Perlin noise value to an integer index in the range [0, octaveCount - 1]
+                octaveIndices[i][j] = (int)(perlinNoise[i][j] * octaveCount);
+            }
+        }
+
+        return octaveIndices;
+    }
 
     public static float[][] GeneratePerlinNoise(int width, int height, int octaveCount) {
         float[][] baseNoise = GenerateWhiteNoise(width, height);

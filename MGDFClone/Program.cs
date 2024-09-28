@@ -11,7 +11,7 @@ internal static class Program {
             .WriteTo.File("logs/game-log.txt", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
-        PerlinNoiseV2.Run();
+        //PerlinNoiseV2.Run();
 
         using MainGame game = new();
         Log.Information("Game Initialized");
