@@ -27,39 +27,39 @@ public class OverworldScreen : ScreenBase {
     }
 
     public override void LoadContent() {
-        eElevationTileType[][] elevationMap = MapGenerator.GenerateElevation(500, 300, _octaves);
+        eTileMapType[][] elevationMap = MapGenerator.GenerateMap(500, 300, _octaves);
         for(int i = 0; i < elevationMap.Length; i++) {
             for (int j = 0; j < elevationMap[i].Length; j++) {
                 Entity tileEntity = _world.CreateEntity();
                 eSprite sprite = eSprite.None;
                 Color color = Color.White;
-                eElevationTileType tile = elevationMap[i][j];
+                eTileMapType tile = elevationMap[i][j];
                 switch (tile) {
-                    case eElevationTileType.DeepWater:
+                    case eTileMapType.DeepWater:
                         sprite = eSprite.Tilde;
                         color = Color.DarkBlue;
                         break;
-                    case eElevationTileType.Water:
+                    case eTileMapType.Water:
                         sprite = eSprite.Tilde;
                         color = Color.Blue;
                         break;
-                    case eElevationTileType.Sand:
+                    case eTileMapType.Sand:
                         sprite = eSprite.CurhsedRocks2;
                         color = Color.Yellow;
                         break;
-                    case eElevationTileType.Grass:
+                    case eTileMapType.Grass:
                         sprite = eSprite.TallGrass;
                         color = Color.DarkGreen;
                         break;
-                    case eElevationTileType.Hill:
+                    case eTileMapType.Hill:
                         sprite = eSprite.Mountain;
                         color = Color.SaddleBrown;
                         break;
-                    case eElevationTileType.Mountain:
+                    case eTileMapType.Mountain:
                         sprite = eSprite.TriangleUp;
                         color = Color.Gray;
                         break;
-                    case eElevationTileType.Snow:
+                    case eTileMapType.Snow:
                         sprite = eSprite.Tilde;
                         color = Color.White;
                         break;
@@ -72,40 +72,6 @@ public class OverworldScreen : ScreenBase {
                     Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE)
                 });
             }
-            //for (int i = 0; i < octaveNoise.Length; i++) {
-            //    for(int j = 0; j < octaveNoise[0].Length; j++) {
-            //        int tile = octaveNoise[i][j];
-            //        eSprite sprite = eSprite.None;
-            //        Color color = Color.White;
-            //        if (tile == 0) {
-            //            sprite = eSprite.Mountain;
-            //            color = Color.Gray;
-            //        }
-            //        if (tile == 1) {
-            //            sprite = eSprite.BigTree;
-            //            color = Color.Green;
-            //        }
-            //        if (tile == 2) {
-            //            sprite = eSprite.TallGrass;
-            //            color = Color.DarkGreen;                    
-            //        }
-            //        if (tile == 3) {
-            //            sprite = eSprite.Tilde;
-            //            color = Color.Blue;
-            //        }
-            //        if (tile == 4) {
-            //            sprite = eSprite.Tilde;
-            //            color = Color.DarkBlue;
-            //        }
-
-            //        Entity tileEntity = _world.CreateEntity();
-            //        tileEntity.Set(new DrawInfoComponent {
-            //            Sprite = sprite,
-            //            Color = color,
-            //            Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE)
-            //        });
-            //    }
-            //}
 
         }
     }
