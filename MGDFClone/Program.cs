@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using MGDFClone.Features;
+using Serilog;
 
 namespace MGDFClone; 
 internal static class Program {
@@ -9,6 +10,9 @@ internal static class Program {
             .WriteTo.Console()
             .WriteTo.File("logs/game-log.txt", rollingInterval: RollingInterval.Day)
             .CreateLogger();
+
+        PerlinNoiseV2.Run();
+
         using MainGame game = new();
         Log.Information("Game Initialized");
         game.Run();
