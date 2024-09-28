@@ -29,7 +29,7 @@ public class OverworldScreen : ScreenBase {
     }
 
     public override void LoadContent() {
-        eTileMapType[][] elevationMap = MapGenerator.GenerateMap(width, height, _octaves, _octaves);
+        eTileMapType[][] elevationMap = MapGeneratorV1.GenerateMap(width, height, _octaves, _octaves);
         for(int i = 0; i < elevationMap.Length; i++) {
             for (int j = 0; j < elevationMap[i].Length; j++) {
                 Entity tileEntity = _world.CreateEntity();
@@ -38,11 +38,11 @@ public class OverworldScreen : ScreenBase {
                 eTileMapType tile = elevationMap[i][j];
                 switch (tile) {
                     case eTileMapType.DeepWater:
-                        sprite = eSprite.Tilde;
+                        sprite = eSprite.Water2;
                         color = Color.DarkBlue;
                         break;
                     case eTileMapType.Water:
-                        sprite = eSprite.Tilde;
+                        sprite = eSprite.Water2;
                         color = Color.Blue;
                         break;
                     case eTileMapType.Sand:
