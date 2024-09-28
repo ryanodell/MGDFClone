@@ -37,7 +37,7 @@ public class MainGame : Game {
         _graphics.ApplyChanges();
         _spriteBatch = new SpriteBatch(_graphics.GraphicsDevice);
         ScreenManager.Instance.ChangeScreen<OverworldScreen>();
-        Globals.TEXTURE = Content.Load<Texture2D>("spritesheet");
+        Globals.TEXTURE = Content.Load<Texture2D>("kruggsmash");
         Globals.FONT = Content.Load<SpriteFont>("SDS_8x8");
         base.LoadContent();
     }

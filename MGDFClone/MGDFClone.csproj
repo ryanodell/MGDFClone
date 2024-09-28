@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Assets\kruggsmash.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\SDS_8x8.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

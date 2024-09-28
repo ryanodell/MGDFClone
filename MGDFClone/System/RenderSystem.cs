@@ -26,7 +26,8 @@ public sealed class RenderSystem : AEntitySetSystem<float> {
 
     protected override void Update(float state, in Entity entity) {
         ref var drawInfo = ref entity.Get<DrawInfoComponent>();
-        _spriteBatch.Draw(Globals.TEXTURE, drawInfo.Position, SpriteSheetManager.GetSourceRectForSprite(drawInfo.Sprite), drawInfo.Color, 0.0f, 
+        var rect = SpriteSheetManager.GetSourceRectForSprite(drawInfo.Sprite);
+        _spriteBatch.Draw(Globals.TEXTURE, drawInfo.Position, rect, drawInfo.Color, 0.0f, 
             Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
 
     }
