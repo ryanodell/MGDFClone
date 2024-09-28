@@ -2,6 +2,7 @@
 
 namespace MGDFClone; 
 public static class Globals {
-    public static Texture2D Texture;
-    public static SpriteFont Font;
+    public static int TILE_SIZE = 16;
+    public static Texture2D TEXTURE;
+    public static SpriteFont FONT;
 }
