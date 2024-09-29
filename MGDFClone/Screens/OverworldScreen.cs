@@ -15,9 +15,9 @@ public class OverworldScreen : ScreenBase {
     float[][] perlinNoise;
     int[][] octaveNoise;
     float _camSpeed = 8.0f;
-    int _octaves = 5;
-    private int width = 300;
-    private int height = 500;
+    int _octaves = 6;
+    private int width = 50;
+    private int height = 40;
     public OverworldScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         _world = new World();
         _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -31,7 +31,7 @@ public class OverworldScreen : ScreenBase {
     public override void LoadContent() {
         eTileMapType[][] elevationMap = MapGeneratorV1.GenerateMap(width, height, _octaves, _octaves);
         for(int i = 0; i < elevationMap.Length; i++) {
-            for (int j = 0; j < elevationMap[i].Length; j++) {
+            for (int j = 0; j < elevationMap[i].Length; j++) {                
                 Entity tileEntity = _world.CreateEntity();
                 eSprite sprite = eSprite.None;
                 Color color = Color.White;

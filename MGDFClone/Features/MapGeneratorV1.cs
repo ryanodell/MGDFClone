@@ -1,5 +1,6 @@
 ﻿namespace MGDFClone.Features {
     public enum eTileMapType {
+        None = 0,
         DeepWater,
         Water,
         Sand,
