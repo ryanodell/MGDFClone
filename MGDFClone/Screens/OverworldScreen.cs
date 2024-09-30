@@ -15,7 +15,7 @@ public class OverworldScreen : ScreenBase {
     float[][] perlinNoise;
     int[][] octaveNoise;
     float _camSpeed = 8.0f;
-    int _octaves = 6;
+    int _octaves = 5;
     private int width = 50;
     private int height = 40;
     public OverworldScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {

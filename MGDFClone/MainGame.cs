@@ -36,7 +36,7 @@ public class MainGame : Game {
         _graphics.PreferredBackBufferHeight = 720;
         _graphics.ApplyChanges();
         _spriteBatch = new SpriteBatch(_graphics.GraphicsDevice);
-        ScreenManager.Instance.ChangeScreen<OverworldScreen>();
+        ScreenManager.Instance.ChangeScreen<MapGenerationScreen>();
         Globals.TEXTURE = Content.Load<Texture2D>("kruggsmash");
         Globals.FONT = Content.Load<SpriteFont>("SDS_8x8");
         base.LoadContent();
