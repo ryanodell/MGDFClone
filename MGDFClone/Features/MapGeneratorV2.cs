@@ -17,4 +17,27 @@ public static class MapGeneratorV2 {
         return PerlinNoiseV2.GeneratePerlinNoise(totalWidth, totalHeight, _perlinOctaves);
     }
 
+    public static void ApplyMapFalloff(float[][] elevationMap, float islandFactor) {
+        int width = elevationMap.Length;
+        int height = elevationMap[0].Length;
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                float distance = _distanceFromCenter(x, y, width, height);
+                float falloffValue = _falloff(distance, islandFactor);
+                elevationMap[x][y] *= falloffValue; // Modify the existing noise value
+            }
+        }
+    }
+
+    private static float _distanceFromCenter(int x, int y, int width, int height) {
+        float dx = (float)(x - width / 2) / (width / 2);
+        float dy = (float)(y - height / 2) / (height / 2);
+        return (float)Math.Sqrt(dx * dx + dy * dy);
+    }
+
+    // Falloff function: Low values near the edges, high values near the center
+    private static float _falloff(float distance, float islandFactor) {
+        return 1 - (float)Math.Pow(distance, islandFactor);
+    }
 }
