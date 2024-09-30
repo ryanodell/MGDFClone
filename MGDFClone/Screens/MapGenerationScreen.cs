@@ -1,5 +1,6 @@
 ﻿using DefaultEcs;
 using MGDFClone.Core;
+using MGDFClone.Features;
 using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,6 +12,7 @@ public class MapGenerationScreen : ScreenBase {
     private World _world;
     private readonly RenderSystem _renderSystem;
     float _camSpeed = 8.0f;
+    private float[][] m_elevationMap;
     public MapGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         _world = new World();
         _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -18,7 +20,8 @@ public class MapGenerationScreen : ScreenBase {
     }    
 
     public override void LoadContent() {
-        
+        //width,height overworld tiles, which consist of 16x16 regions
+        m_elevationMap = MapGeneratorV2.GenerateElevation(17, 17);
     }
 
     public override void UnloadContent() {
