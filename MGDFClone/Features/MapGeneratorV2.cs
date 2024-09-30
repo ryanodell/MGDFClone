@@ -8,13 +8,17 @@
 namespace MGDFClone.Features;
 public static class MapGeneratorV2 {
     private static readonly int _regionTilesize = 16;
-    private static readonly int _perlinOctaves = 4;
-    public static float[][] GenerateElevation(int width, int height) {
+    private static readonly int _perlinOctaves = 4;    
+
+    public static float[][] GenerateIsland(int width, int height) {
+        float[][] returnValue;
         //Width in this contex is how many overworld tiles will we have?
         //Each overworld tile contains 16x16 tiles. We won't go into any more "detail" as in layers at this point
         int totalWidth = width * _regionTilesize;
         int totalHeight = height * _regionTilesize;
-        return PerlinNoiseV2.GeneratePerlinNoise(totalWidth, totalHeight, _perlinOctaves);
+        returnValue = PerlinNoiseV2.GeneratePerlinNoise(totalWidth, totalHeight, _perlinOctaves);
+        ApplyMapFalloff(returnValue, 5);
+        return returnValue;
     }
 
     public static void ApplyMapFalloff(float[][] elevationMap, float islandFactor) {

@@ -21,7 +21,7 @@ public class OverworldScreen : ScreenBase {
     public OverworldScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         _world = new World();
         _camera = new Camera2D(_graphics.GraphicsDevice);
-        _camera.Zoom = 3.5f;
+        _camera.Zoom = 1.5f;
         _camera.LookAt(Vector2.Zero);
         _renderSystem = new RenderSystem(_world, _spriteBatch, _camera);
         perlinNoise = PerlinNoiseV2.GeneratePerlinNoise(width, height, _octaves);
