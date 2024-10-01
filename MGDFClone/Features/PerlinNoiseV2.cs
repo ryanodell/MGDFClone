@@ -1,23 +1,26 @@
-﻿namespace MGDFClone.Features {
+﻿using Serilog;
+
+namespace MGDFClone.Features {
     public static class PerlinNoiseV2 {
         public static float[] GeneratePerlinNoise(int width, int height, int octaveCount) {
-            // Generate base white noise
             float[] baseNoise = GenerateWhiteNoise(width, height);
-
-            // Create a flat array to hold each octave's smooth noise
             float[] perlinNoise = new float[width * height];
-            float persistance = 0.7f;
+            float persistance = 0.5f;  // Adjust persistence for smoother blending
 
             float amplitude = 1.0f;
             float totalAmplitude = 0.0f;
 
-            // Blend noise together for each octave
-            for (int octave = 0; octave < octaveCount; octave++) {
-                // Generate smooth noise for the current octave
-                float[] smoothNoise = GenerateSmoothNoise(baseNoise, width, height, octave);
+            var logger = new LoggerConfiguration().WriteTo.Console(Serilog.Events.LogEventLevel.Debug)
+                            .WriteTo.File("perlin_noise_debug.log")
+                            .CreateLogger();
 
-                // Accumulate Perlin noise values
-                amplitude *= persistance;
+            for (int octave = 0; octave < octaveCount; octave++) {
+                int frequency = 1 << octave;  // Frequency scaling: 2^octave
+                float[] smoothNoise = GenerateSmoothNoise(baseNoise, width, height, frequency);
+
+                LogGrid(smoothNoise, width, height, logger, $"Smooth Noise (Octave {octave})");
+
+                amplitude = MathF.Pow(persistance, octave);  // Reduce amplitude more aggressively
                 totalAmplitude += amplitude;
 
                 for (int i = 0; i < width * height; i++) {
@@ -25,12 +28,30 @@
                 }
             }
 
-            // Normalize the Perlin noise values
             for (int i = 0; i < width * height; i++) {
                 perlinNoise[i] /= totalAmplitude;
             }
+            // If needed, clamp the values to ensure they remain in range
+            //for (int i = 0; i < width * height; i++) {
+            //    perlinNoise[i] = Math.Clamp(perlinNoise[i], 0, 1);
+            //}
+
+
+            LogGrid(perlinNoise, width, height, logger, "Final Perlin Noise");
 
             return perlinNoise;
+        }
+
+        private static void LogGrid(float[] grid, int width, int height, Serilog.ILogger logger, string description) {
+            logger.Information(description);
+            for (int y = 0; y < height; y++) {
+                string row = "";
+                for (int x = 0; x < width; x++) {
+                    row += $"{grid[x + y * width]:0.00} ";
+                }
+                logger.Information(row);
+            }
+            logger.Information(""); // Blank line for spacing
         }
 
         public static float[] GenerateWhiteNoise(int width, int height) {
@@ -45,37 +66,27 @@
             return noise;
         }
 
-        public static float[] GenerateSmoothNoise(float[] baseNoise, int width, int height, int octave) {
+        private static float[] GenerateSmoothNoise(float[] baseNoise, int width, int height, int frequency) {
             float[] smoothNoise = new float[width * height];
-            int samplePeriod = 1 << octave; // 2 ^ octave
+
+            int samplePeriod = frequency; // Sample points every 'frequency' pixels
             float sampleFrequency = 1.0f / samplePeriod;
 
-            for (int i = 0; i < width; i++) {
-                // Calculate horizontal sampling indices
-                int sample_i0 = (i / samplePeriod) * samplePeriod;
-                int sample_i1 = (sample_i0 + samplePeriod) % width; // Wrap around
-                float horizontal_blend = (i - sample_i0) * sampleFrequency;
+            for (int y = 0; y < height; y++) {
+                int sampleY0 = (y / samplePeriod) * samplePeriod;
+                int sampleY1 = (sampleY0 + samplePeriod) % height; // Wrap around
+                float verticalBlend = (y - sampleY0) * sampleFrequency;
 
-                for (int j = 0; j < height; j++) {
-                    // Calculate vertical sampling indices
-                    int sample_j0 = (j / samplePeriod) * samplePeriod;
-                    int sample_j1 = (sample_j0 + samplePeriod) % height; // Wrap around
-                    float vertical_blend = (j - sample_j0) * sampleFrequency;
+                for (int x = 0; x < width; x++) {
+                    int sampleX0 = (x / samplePeriod) * samplePeriod;
+                    int sampleX1 = (sampleX0 + samplePeriod) % width; // Wrap around
+                    float horizontalBlend = (x - sampleX0) * sampleFrequency;
 
-                    // Calculate indices for baseNoise and smoothNoise
-                    int index0 = sample_i0 + sample_j0 * width; // Top-left corner
-                    int index1 = sample_i1 + sample_j0 * width; // Top-right corner
-                    int index2 = sample_i0 + sample_j1 * width; // Bottom-left corner
-                    int index3 = sample_i1 + sample_j1 * width; // Bottom-right corner
+                    // Interpolate between the four sample points
+                    float top = Interpolate(baseNoise[sampleY0 * width + sampleX0], baseNoise[sampleY0 * width + sampleX1], horizontalBlend);
+                    float bottom = Interpolate(baseNoise[sampleY1 * width + sampleX0], baseNoise[sampleY1 * width + sampleX1], horizontalBlend);
 
-                    // Blend the top two corners
-                    float top = Interpolate(baseNoise[index0], baseNoise[index1], horizontal_blend);
-
-                    // Blend the bottom two corners
-                    float bottom = Interpolate(baseNoise[index2], baseNoise[index3], horizontal_blend);
-
-                    // Final blend
-                    smoothNoise[i + j * width] = Interpolate(top, bottom, vertical_blend);
+                    smoothNoise[y * width + x] = Interpolate(top, bottom, verticalBlend);
                 }
             }
 

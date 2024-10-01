@@ -15,7 +15,7 @@ public class MapGenerationScreen : ScreenBase {
     float _camSpeed = 8.0f;
     private float[][] m_elevationMap;
     //private int mapWidth = 100, mapHeight = 75;
-    private int mapWidth = 3, mapHeight = 3;
+    private int mapWidth = 25, mapHeight = 25;
     private const int regionSize = 16;
 
     private float[] m_heightMap;
@@ -29,67 +29,69 @@ public class MapGenerationScreen : ScreenBase {
 
     public override void LoadContent() {
         //width,height overworld tiles, which consist of 16x16 regions
-        //m_heightMap = PerlinNoiseV2.GeneratePerlinNoise(mapWidth, mapHeight, 3);        
-        //for (int i = 0; i < m_heightMap.Length; i++) {
-        //    Entity tile = _world.CreateEntity();
-        //    eSprite sprite = eSprite.None;
-        //    Color color = Color.White;
-        //    int row = i / mapWidth;
-        //    int column = i % mapWidth;
-        //    var tileType = _determineBaseTerrain(m_heightMap[i]);
-        //    switch (tileType) {
-        //        case eTileMapType.DeepWater:
-        //            sprite = eSprite.Water2;
-        //            color = Color.DarkBlue;
-        //            break;
-        //        case eTileMapType.Water:
-        //            sprite = eSprite.Water2;
-        //            color = Color.Blue;
-        //            break;
-        //        case eTileMapType.Sand:
-        //            sprite = eSprite.CurhsedRocks2;
-        //            color = Color.Yellow;
-        //            break;
-        //        case eTileMapType.Grass:
-        //            sprite = eSprite.TallGrass;
-        //            color = Color.DarkGreen;
-        //            break;
-        //        case eTileMapType.SmallTree:
-        //            sprite = eSprite.SmallTree;
-        //            color = Color.DarkOliveGreen;
-        //            break;
-        //        case eTileMapType.Forest:
-        //            sprite = eSprite.BigTree;
-        //            color = Color.Green;
-        //            break;
-        //        case eTileMapType.Hill:
-        //            sprite = eSprite.Mountain;
-        //            color = Color.SaddleBrown;
-        //            break;
-        //        case eTileMapType.Mountain:
-        //            sprite = eSprite.TriangleUp;
-        //            color = Color.Gray;
-        //            break;
-        //        case eTileMapType.Snow:
-        //            sprite = eSprite.Tilde;
-        //            color = Color.White;
-        //            break;
-        //        default:
-        //            break;
-        //    }
-        //    tile.Set(new DrawInfoComponent {
-        //        Sprite = sprite,
-        //        Color = color,
-        //        Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE)
-        //    });
-        //}
-        m_elevationMap = MapGeneratorV2.GenerateIsland(mapWidth, mapHeight);
-        MapGeneratorV2.ApplyMapFalloff(m_elevationMap, 3);
-        for (int i = 0; i < mapWidth * regionSize; i++) {
-            for (int j = 0; j < mapHeight * regionSize; j++) {
-                _addTileToWorld(i, j);
+        m_heightMap = PerlinNoiseV2.GeneratePerlinNoise(mapWidth, mapHeight, 4);
+        for (int i = 0; i < m_heightMap.Length; i++) {
+            Entity tile = _world.CreateEntity();
+            eSprite sprite = eSprite.None;
+            Color color = Color.White;
+            int row = i / mapWidth;
+            int column = i % mapWidth;
+            var tileType = _determineBaseTerrain(m_heightMap[i]);
+            switch (tileType) {
+                case eTileMapType.DeepWater:
+                    sprite = eSprite.Water2;
+                    color = Color.DarkBlue;
+                    break;
+                case eTileMapType.Water:
+                    sprite = eSprite.Water2;
+                    color = Color.Blue;
+                    break;
+                case eTileMapType.Sand:
+                    sprite = eSprite.CurhsedRocks2;
+                    color = Color.Yellow;
+                    break;
+                case eTileMapType.Grass:
+                    sprite = eSprite.TallGrass;
+                    color = Color.DarkGreen;
+                    break;
+                case eTileMapType.SmallTree:
+                    sprite = eSprite.SmallTree;
+                    color = Color.DarkOliveGreen;
+                    break;
+                case eTileMapType.Forest:
+                    sprite = eSprite.BigTree;
+                    color = Color.Green;
+                    break;
+                case eTileMapType.Hill:
+                    sprite = eSprite.Mountain;
+                    color = Color.SaddleBrown;
+                    break;
+                case eTileMapType.Mountain:
+                    sprite = eSprite.TriangleUp;
+                    color = Color.Gray;
+                    break;
+                case eTileMapType.Snow:
+                    sprite = eSprite.Tilde;
+                    color = Color.White;
+                    break;
+                default:
+                    break;
             }
+            tile.Set(new DrawInfoComponent {
+                Sprite = sprite,
+                Color = color,
+                Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE)
+            });
         }
+
+
+        //m_elevationMap = MapGeneratorV2.GenerateIsland(mapWidth, mapHeight);
+        //MapGeneratorV2.ApplyMapFalloff(m_elevationMap, 3);
+        //for (int i = 0; i < mapWidth; i++) {
+        //    for (int j = 0; j < mapHeight; j++) {
+        //        _addTileToWorld(i, j);
+        //    }
+        //}
     }
 
     public override void UnloadContent() {
