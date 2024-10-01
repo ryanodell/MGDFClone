@@ -16,6 +16,8 @@ public class MapGenerationScreen : ScreenBase {
     private float[][] m_elevationMap;
     private int mapWidth = 17, mapHeight = 17;
     private const int regionSize = 16;
+
+    private float[] m_heightMap;
     public MapGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         _world = new World();
         _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -26,6 +28,7 @@ public class MapGenerationScreen : ScreenBase {
 
     public override void LoadContent() {
         //width,height overworld tiles, which consist of 16x16 regions
+        m_heightMap = PerlinNoiseV2.GeneratePerlinNoise(mapWidth, mapHeight, 4);
         m_elevationMap = MapGeneratorV2.GenerateIsland(mapWidth, mapHeight);
         MapGeneratorV2.ApplyMapFalloff(m_elevationMap, 3);        
         for (int i = 0; i < mapWidth * regionSize; i++) {            

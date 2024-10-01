@@ -8,7 +8,7 @@
 namespace MGDFClone.Features;
 public static class MapGeneratorV2 {
     private static readonly int _regionTilesize = 16;
-    private static readonly int _perlinOctaves = 4;    
+    private static readonly int _perlinOctaves = 4;
 
     public static float[][] GenerateIsland(int width, int height) {
         float[][] returnValue;
