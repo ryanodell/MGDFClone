@@ -17,10 +17,10 @@
 
     public static class MapGeneratorV1 {
         public static eTileMapType[][] GenerateMap(int width, int height, int elevationOctaves, int vegativeOctave) {
-            float[][] elevationNoise = PerlinNoiseV2.GeneratePerlinNoise(width, height, elevationOctaves);
+            float[][] elevationNoise = PerlinNoiseV1.GeneratePerlinNoise(width, height, elevationOctaves);
             //MapGeneratorV2.ApplyMapFalloff(elevationNoise, 5);
             //GenerateRivers(elevationNoise, 5000);
-            float[][] vegatativeNoise = PerlinNoiseV2.GeneratePerlinNoise(width, height, vegativeOctave);
+            float[][] vegatativeNoise = PerlinNoiseV1.GeneratePerlinNoise(width, height, vegativeOctave);
             eTileMapType[][] tileMap = new eTileMapType[width][];
             for (int i = 0; i < width; i++) {
                 tileMap[i] = new eTileMapType[height];

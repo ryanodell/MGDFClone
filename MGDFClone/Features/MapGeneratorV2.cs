@@ -16,7 +16,7 @@ public static class MapGeneratorV2 {
         //Each overworld tile contains 16x16 tiles. We won't go into any more "detail" as in layers at this point
         int totalWidth = width * _regionTilesize;
         int totalHeight = height * _regionTilesize;
-        returnValue = PerlinNoiseV2.GeneratePerlinNoise(totalWidth, totalHeight, _perlinOctaves);
+        returnValue = PerlinNoiseV1.GeneratePerlinNoise(totalWidth, totalHeight, _perlinOctaves);
         ApplyMapFalloff(returnValue, 5);
         return returnValue;
     }

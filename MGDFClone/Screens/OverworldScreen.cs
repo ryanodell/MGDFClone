@@ -24,8 +24,8 @@ public class OverworldScreen : ScreenBase {
         _camera.Zoom = 1.5f;
         _camera.LookAt(Vector2.Zero);
         _renderSystem = new RenderSystem(_world, _spriteBatch, _camera);
-        perlinNoise = PerlinNoiseV2.GeneratePerlinNoise(width, height, _octaves);
-        octaveNoise = PerlinNoiseV2.GetOctaveIndices(perlinNoise, _octaves);
+        perlinNoise = PerlinNoiseV1.GeneratePerlinNoise(width, height, _octaves);
+        octaveNoise = PerlinNoiseV1.GetOctaveIndices(perlinNoise, _octaves);
     }
 
     public override void LoadContent() {

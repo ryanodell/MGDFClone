@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 
 namespace MGDFClone.Features; 
-public class PerlinNoiseV2 {
+public class PerlinNoiseV1 {
     #region Feilds
     static Random random = new Random();
     #endregion
