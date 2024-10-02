@@ -50,6 +50,59 @@ namespace MGDFClone.Screens {
                 _perlinNoise[i] /= _totalAmplitude;
             }
             _currentOcatave++;
+            for (int i = 0; i < _perlinNoise.Length; i++) {
+                Entity tile = _world.CreateEntity();
+                eSprite sprite = eSprite.None;
+                Color color = Color.White;
+                int row = i / _width;
+                int column = i % _height;
+                var tileType = _determineBaseTerrain(_perlinNoise[i]);
+                switch (tileType) {
+                    case eTileMapType.DeepWater:
+                        sprite = eSprite.Water2;
+                        color = Color.DarkBlue;
+                        break;
+                    case eTileMapType.Water:
+                        sprite = eSprite.Water2;
+                        color = Color.Blue;
+                        break;
+                    case eTileMapType.Sand:
+                        sprite = eSprite.CurhsedRocks2;
+                        color = Color.Yellow;
+                        break;
+                    case eTileMapType.Grass:
+                        sprite = eSprite.TallGrass;
+                        color = Color.DarkGreen;
+                        break;
+                    case eTileMapType.SmallTree:
+                        sprite = eSprite.SmallTree;
+                        color = Color.DarkOliveGreen;
+                        break;
+                    case eTileMapType.Forest:
+                        sprite = eSprite.BigTree;
+                        color = Color.Green;
+                        break;
+                    case eTileMapType.Hill:
+                        sprite = eSprite.Mountain;
+                        color = Color.SaddleBrown;
+                        break;
+                    case eTileMapType.Mountain:
+                        sprite = eSprite.TriangleUp;
+                        color = Color.Gray;
+                        break;
+                    case eTileMapType.Snow:
+                        sprite = eSprite.Tilde;
+                        color = Color.White;
+                        break;
+                    default:
+                        break;
+                }
+                tile.Set(new DrawInfoComponent {
+                    Sprite = sprite,
+                    Color = color,
+                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE)
+                });
+            }
         }
 
         public override void Update(GameTime gameTime) {
@@ -62,9 +115,7 @@ namespace MGDFClone.Screens {
                 foreach (var entity in _world.GetEntities().AsEnumerable()) {
                     entity.Dispose();
                 }
-
-
-
+                _run();
                 _step = false;
             }
         }
@@ -110,7 +161,26 @@ namespace MGDFClone.Screens {
             return smoothNoise;
         }
 
-        public void _generateWhiteNoise(int width, int height) {
+        private eTileMapType _determineBaseTerrain(float elevationValue) {
+            if (elevationValue < 0.20f)
+                return eTileMapType.DeepWater; // Low elevation = Water
+            if (elevationValue < 0.30f)
+                return eTileMapType.Water; // Low elevation = Water
+            else if (elevationValue < 0.35f)
+                return eTileMapType.Sand; // Slightly higher = Sand (beach)
+            else if (elevationValue < 0.50f)
+                return eTileMapType.Grass; // Middle = Grasslands
+            else if (elevationValue < 0.70f)
+                return eTileMapType.Hill; // Middle = Grasslands
+            else if (elevationValue < 0.80f)
+                return eTileMapType.Mountain; // Higher = Mountain
+            else
+                return eTileMapType.Snow; // Highest = Snow
+        }
+
+
+
+        private void _generateWhiteNoise(int width, int height) {
             _baseNoise = new float[width * height];
             Random random = new Random(); // Instantiate the random number generator
 
