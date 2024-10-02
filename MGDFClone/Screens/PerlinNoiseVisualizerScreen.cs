@@ -6,6 +6,7 @@ using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Serilog;
 
 namespace MGDFClone.Screens {
     public class PerlinNoiseVisualizerScreen : ScreenBase {
@@ -14,7 +15,7 @@ namespace MGDFClone.Screens {
         float _camSpeed = 8.0f;
         private readonly RenderSystem _renderSystem;
         private bool _step = false;
-        private int _width = 50, _height = 50;
+        private int _width = 150, _height = 150;
         private float[] _baseNoise;
         private float[] _perlinNoise;
 
@@ -25,8 +26,9 @@ namespace MGDFClone.Screens {
         public PerlinNoiseVisualizerScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
-            _camera.Zoom = 2.5f;
-            _camera.LookAt(Vector2.Zero);
+            _camera.Zoom = 0.5f;
+            _camera.LookAt(new Vector2((_width * 16) / (_height * 16) / 2));
+            _camera.Position = new Vector2((_width * 16) / (_height * 16) / 2);
             _renderSystem = new RenderSystem(_world, _spriteBatch, _camera);
         }       
 
@@ -48,53 +50,58 @@ namespace MGDFClone.Screens {
             }
             for (int i = 0; i < _width * _height; i++) {
                 _perlinNoise[i] /= _totalAmplitude;
-            }
-            _currentOcatave++;
+            }            
             for (int i = 0; i < _perlinNoise.Length; i++) {
                 Entity tile = _world.CreateEntity();
                 eSprite sprite = eSprite.None;
                 Color color = Color.White;
                 int row = i / _width;
                 int column = i % _height;
-                var tileType = _determineBaseTerrain(_perlinNoise[i]);
-                switch (tileType) {
-                    case eTileMapType.DeepWater:
-                        sprite = eSprite.Water2;
+                
+                float elevation = _perlinNoise[i];
+                switch (elevation) {
+                    case <= 0.0f:
+                        sprite = eSprite.Orb;
+                        break;
+                    case <= 0.1f:
+                        sprite = eSprite.Number1;
                         color = Color.DarkBlue;
                         break;
-                    case eTileMapType.Water:
-                        sprite = eSprite.Water2;
+                    case <= 0.2f:
+                        sprite = eSprite.Number2;
                         color = Color.Blue;
                         break;
-                    case eTileMapType.Sand:
-                        sprite = eSprite.CurhsedRocks2;
-                        color = Color.Yellow;
+                    case <= 0.3f:
+                        sprite = eSprite.Number3;
+                        color = Color.LightBlue;
                         break;
-                    case eTileMapType.Grass:
-                        sprite = eSprite.TallGrass;
+                    case <= 0.4f:
+                        sprite = eSprite.Number4;
                         color = Color.DarkGreen;
                         break;
-                    case eTileMapType.SmallTree:
-                        sprite = eSprite.SmallTree;
-                        color = Color.DarkOliveGreen;
-                        break;
-                    case eTileMapType.Forest:
-                        sprite = eSprite.BigTree;
+                    case <= 0.5f:
+                        sprite = eSprite.Number5;
                         color = Color.Green;
                         break;
-                    case eTileMapType.Hill:
-                        sprite = eSprite.Mountain;
-                        color = Color.SaddleBrown;
+                    case <= 0.6f:
+                        sprite = eSprite.Number6;
+                        color = Color.DarkGreen;
                         break;
-                    case eTileMapType.Mountain:
-                        sprite = eSprite.TriangleUp;
-                        color = Color.Gray;
+                    case <= 0.7f:
+                        sprite = eSprite.Number7;
+                        color = Color.DarkRed;
                         break;
-                    case eTileMapType.Snow:
-                        sprite = eSprite.Tilde;
-                        color = Color.White;
+                    case <= 0.8f:
+                        sprite = eSprite.Number8;
+                        color = Color.Red;
+                        break;
+                    case <= 0.9f:
+                        sprite = eSprite.Number9;
+                        color = Color.OrangeRed;
                         break;
                     default:
+                        sprite = eSprite.Anvil;
+                        color = Color.OrangeRed;
                         break;
                 }
                 tile.Set(new DrawInfoComponent {
@@ -103,6 +110,8 @@ namespace MGDFClone.Screens {
                     Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE)
                 });
             }
+            Log.Logger.Debug("Drew Ocave: " + _currentOcatave);
+            _currentOcatave++;
         }
 
         public override void Update(GameTime gameTime) {
