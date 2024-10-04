@@ -1,7 +1,8 @@
 ﻿using DefaultEcs;
 using MGDFClone.Components;
 using MGDFClone.Core;
-using MGDFClone.Features;
+using MGDFClone.Features.MapGen;
+using MGDFClone.Features.PerlinNoise;
 using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

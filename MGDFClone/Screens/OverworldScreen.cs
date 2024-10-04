@@ -1,13 +1,14 @@
 ﻿using DefaultEcs;
 using MGDFClone.Components;
 using MGDFClone.Core;
-using MGDFClone.Features;
+using MGDFClone.Features.MapGen;
+using MGDFClone.Features.PerlinNoise;
 using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace MGDFClone.Screens; 
+namespace MGDFClone.Screens;
 public class OverworldScreen : ScreenBase {
     private World _world;
     private Camera2D _camera;

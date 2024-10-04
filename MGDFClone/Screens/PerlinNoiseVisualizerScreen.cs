@@ -1,14 +1,16 @@
 ﻿using DefaultEcs;
 using MGDFClone.Components;
 using MGDFClone.Core;
-using MGDFClone.Features;
+using MGDFClone.Features.MapGen;
+using MGDFClone.Features.PerlinNoise;
 using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Serilog;
 
-namespace MGDFClone.Screens {
+namespace MGDFClone.Screens
+{
     public class PerlinNoiseVisualizerScreen : ScreenBase {
         private float _basePersistance = 0.7f;
         private float _baseAplitude = 1.0f;

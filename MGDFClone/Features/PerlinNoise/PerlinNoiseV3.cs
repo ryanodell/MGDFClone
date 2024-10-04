@@ -1,52 +1,66 @@
-﻿namespace MGDFClone.Features {
-    public static class PerlinNoiseV3 {
+﻿namespace MGDFClone.Features.PerlinNoise
+{
+    public static class PerlinNoiseV3
+    {
         static Random random = new Random();
-        public static float[] GeneratePerlinNoise(int width, int height, int octaves) {
+        public static float[] GeneratePerlinNoise(int width, int height, int octaves)
+        {
             float[][] baseNoise = GenerateWhiteNoise(width, height);
             float[] returnValue = new float[width * height];
             float[][][] smoothNoise = new float[octaves][][];
             float persistance = 0.7f;
-            for (int i = 0; i < octaves; i++) {
+            for (int i = 0; i < octaves; i++)
+            {
                 smoothNoise[i] = GenerateSmoothNoise(baseNoise, i);
             }
             float[][] perlinNoise = GetEmptyArray<float>(width, height); //an array of floats initialised to 0
             float amplitude = 1.0f;
             float totalAmplitude = 0.0f;
-            for (int octave = octaves - 1; octave >= 0; octave--) {
+            for (int octave = octaves - 1; octave >= 0; octave--)
+            {
                 amplitude *= persistance;
                 totalAmplitude += amplitude;
-                for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
+                for (int i = 0; i < width; i++)
+                {
+                    for (int j = 0; j < height; j++)
+                    {
                         perlinNoise[i][j] += smoothNoise[octave][i][j] * amplitude;
                     }
                 }
             }
             //normalisation
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
                     //We need to normalize to the total aplitude - sort of like clamping to normalized coords.
                     perlinNoise[i][j] /= totalAmplitude;
                 }
             }
-            for(int i = 0; i < width * height; i++) {
+            for (int i = 0; i < width * height; i++)
+            {
                 int col = i % width;
-                int row = i / width;                
+                int row = i / width;
                 returnValue[i] = perlinNoise[col][row];
             }
 
             return returnValue;
         }
 
-        public static float[][] GenerateWhiteNoise(int width, int height) {
+        public static float[][] GenerateWhiteNoise(int width, int height)
+        {
             float[][] noise = GetEmptyArray<float>(width, height);
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
                     noise[i][j] = (float)random.NextDouble() % 1;
                 }
             }
             return noise;
         }
-        public static float[][] GenerateSmoothNoise(float[][] baseNoise, int octave) {
+        public static float[][] GenerateSmoothNoise(float[][] baseNoise, int octave)
+        {
             int width = baseNoise.Length;
             int height = baseNoise[0].Length;
             float[][] smoothNoise = GetEmptyArray<float>(width, height);
@@ -57,7 +71,8 @@
                                             //sampleFrequency is the inverse of samplePeriod. It controls how much influence nearby points have when blending values,
                                             //with a smaller frequency resulting in a smoother transition between values.
             float sampleFrequency = 1.0f / samplePeriod;
-            for (int i = 0; i < width; i++) {
+            for (int i = 0; i < width; i++)
+            {
                 //calculate the horizontal sampling indices
                 //sample_i0 is the index of the nearest left sampling point. It is calculated as i / samplePeriod * samplePeriod
                 int sample_i0 = i / samplePeriod * samplePeriod;
@@ -69,7 +84,8 @@
                 //and 1 means it is at sample_i1
                 float horizontal_blend = (i - sample_i0) * sampleFrequency;
 
-                for (int j = 0; j < height; j++) {
+                for (int j = 0; j < height; j++)
+                {
                     //calculate the vertical sampling indices
                     //For each row j in the array, similar to the horizontal case, sample_j0 is the nearest upper sampling point.
                     int sample_j0 = j / samplePeriod * samplePeriod;
@@ -96,17 +112,20 @@
             return smoothNoise;
         }
 
-        public static T[][] GetEmptyArray<T>(int width, int height) {
+        public static T[][] GetEmptyArray<T>(int width, int height)
+        {
             T[][] image = new T[width][];
 
-            for (int i = 0; i < width; i++) {
+            for (int i = 0; i < width; i++)
+            {
                 image[i] = new T[height];
             }
 
             return image;
         }
 
-        public static float Interpolate(float x0, float x1, float alpha) {
+        public static float Interpolate(float x0, float x1, float alpha)
+        {
             return x0 * (1 - alpha) + alpha * x1;
         }
     }
