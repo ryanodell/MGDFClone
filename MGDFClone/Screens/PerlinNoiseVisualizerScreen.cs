@@ -10,19 +10,23 @@ using Serilog;
 
 namespace MGDFClone.Screens {
     public class PerlinNoiseVisualizerScreen : ScreenBase {
+        private float _basePersistance = 0.7f;
+        private float _baseAplitude = 1.0f;
+        private float _baseTotalAplitude = 0.0f;
+
         private Camera2D _camera;
         private World _world;
         float _camSpeed = 8.0f;
         private readonly RenderSystem _renderSystem;
         private bool _step = false;
         private int _width = 150, _height = 150;
-        private float[] _baseNoise;
-        private float[] _perlinNoise;
+        private float[] _baseNoiseBorked;
+        private float[] _perlinNoiseBorked;
 
-        private float _persistance = 0.7f;
-        private float _amplitude = 1.0f;
-        private float _totalAmplitude = 0.0f;
-        private int _currentOcatave;
+        private float _persistanceBorked = 0.7f;
+        private float _amplitudeBorked = 1.0f;
+        private float _totalAmplitudeBorked = 0.0f;
+        private int _currentOcataveBorked;
         public PerlinNoiseVisualizerScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -34,31 +38,31 @@ namespace MGDFClone.Screens {
 
         public override void LoadContent() {
             _generateWhiteNoise(_width, _height);
-            _perlinNoise = new float[_width * _height];
+            _perlinNoiseBorked = new float[_width * _height];
         }
 
         public override void UnloadContent() {
 
         }
 
-        private void _run() {
-            float[] smoothNoise = _generateSmoothNoise(_width, _height, _currentOcatave);
-            _amplitude *= _persistance;
-            _totalAmplitude += _amplitude;
+        private void _runBorked() {
+            float[] smoothNoise = _generateSmoothNoise(_width, _height, _currentOcataveBorked);
+            _amplitudeBorked *= _persistanceBorked;
+            _totalAmplitudeBorked += _amplitudeBorked;
             for (int i = 0; i < _width * _height; i++) {
-                _perlinNoise[i] += smoothNoise[i] * _amplitude;
+                _perlinNoiseBorked[i] += smoothNoise[i] * _amplitudeBorked;
             }
             for (int i = 0; i < _width * _height; i++) {
-                _perlinNoise[i] /= _totalAmplitude;
+                _perlinNoiseBorked[i] /= _totalAmplitudeBorked;
             }            
-            for (int i = 0; i < _perlinNoise.Length; i++) {
+            for (int i = 0; i < _perlinNoiseBorked.Length; i++) {
                 Entity tile = _world.CreateEntity();
                 eSprite sprite = eSprite.None;
                 Color color = Color.White;
                 int row = i / _width;
                 int column = i % _height;
                 
-                float elevation = _perlinNoise[i];
+                float elevation = _perlinNoiseBorked[i];
                 switch (elevation) {
                     case <= 0.0f:
                         sprite = eSprite.Orb;
@@ -110,8 +114,8 @@ namespace MGDFClone.Screens {
                     Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE)
                 });
             }
-            Log.Logger.Debug("Drew Ocave: " + _currentOcatave);
-            _currentOcatave++;
+            Log.Logger.Debug("Drew Ocave: " + _currentOcataveBorked);
+            _currentOcataveBorked++;
         }
 
         public override void Update(GameTime gameTime) {
@@ -121,16 +125,57 @@ namespace MGDFClone.Screens {
             }
             if (_step) {
                 //Remove all entities
-                foreach (var entity in _world.GetEntities().AsEnumerable()) {
-                    entity.Dispose();
-                }
-                _run();
+                _reset();
+                _runBorked();
                 _step = false;
+            }
+        }
+
+        private void _reset() {
+            foreach (var entity in _world.GetEntities().AsEnumerable()) {
+                entity.Dispose();
             }
         }
 
         public override void Draw(GameTime gameTime) {
             _renderSystem.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
+        }
+
+        private float[] _generateSmoothNoiseSuboptimally(int width, int height, int octave) {
+            float[] smoothNoise = new float[width * height];
+            int samplePeriod = 1 << octave; // 2 ^ octave
+            float sampleFrequency = 1.0f / samplePeriod;
+
+            for (int i = 0; i < width; i++) {
+                // Calculate horizontal sampling indices
+                int sample_i0 = (i / samplePeriod) * samplePeriod;
+                int sample_i1 = (sample_i0 + samplePeriod) % width; // Wrap around
+                float horizontal_blend = (i - sample_i0) * sampleFrequency;
+
+                for (int j = 0; j < height; j++) {
+                    // Calculate vertical sampling indices
+                    int sample_j0 = (j / samplePeriod) * samplePeriod;
+                    int sample_j1 = (sample_j0 + samplePeriod) % height; // Wrap around
+                    float vertical_blend = (j - sample_j0) * sampleFrequency;
+
+                    // Calculate indices for baseNoise and smoothNoise
+                    int index0 = sample_i0 + sample_j0 * width; // Top-left corner
+                    int index1 = sample_i1 + sample_j0 * width; // Top-right corner
+                    int index2 = sample_i0 + sample_j1 * width; // Bottom-left corner
+                    int index3 = sample_i1 + sample_j1 * width; // Bottom-right corner
+
+                    // Blend the top two corners
+                    float top = PerlinNoiseV2.Interpolate(_baseNoiseBorked[index0], _baseNoiseBorked[index1], horizontal_blend);
+
+                    // Blend the bottom two corners
+                    float bottom = PerlinNoiseV2.Interpolate(_baseNoiseBorked[index2], _baseNoiseBorked[index3], horizontal_blend);
+
+                    // Final blend
+                    smoothNoise[i + j * width] = PerlinNoiseV2.Interpolate(top, bottom, vertical_blend);
+                }
+            }
+
+            return smoothNoise;
         }
 
         private float[] _generateSmoothNoise(int width, int height, int octave) {
@@ -157,10 +202,10 @@ namespace MGDFClone.Screens {
                     int index3 = sample_i1 + sample_j1 * width; // Bottom-right corner
 
                     // Blend the top two corners
-                    float top = PerlinNoiseV2.Interpolate(_baseNoise[index0], _baseNoise[index1], horizontal_blend);
+                    float top = PerlinNoiseV2.Interpolate(_baseNoiseBorked[index0], _baseNoiseBorked[index1], horizontal_blend);
 
                     // Blend the bottom two corners
-                    float bottom = PerlinNoiseV2.Interpolate(_baseNoise[index2], _baseNoise[index3], horizontal_blend);
+                    float bottom = PerlinNoiseV2.Interpolate(_baseNoiseBorked[index2], _baseNoiseBorked[index3], horizontal_blend);
 
                     // Final blend
                     smoothNoise[i + j * width] = PerlinNoiseV2.Interpolate(top, bottom, vertical_blend);
@@ -190,12 +235,12 @@ namespace MGDFClone.Screens {
 
 
         private void _generateWhiteNoise(int width, int height) {
-            _baseNoise = new float[width * height];
+            _baseNoiseBorked = new float[width * height];
             Random random = new Random(); // Instantiate the random number generator
 
             // Generate random noise values
             for (int i = 0; i < width * height; i++) {
-                _baseNoise[i] = (float)random.NextDouble();
+                _baseNoiseBorked[i] = (float)random.NextDouble();
             }
         }
 
