@@ -16,6 +16,29 @@ namespace MGDFClone.Features {
                 smoothNoise[i] = GenerateSmoothNoise(baseNoise, i);
             }
             float[][] perlinNoise = GetEmptyArray<float>(width, height); //an array of floats initialised to 0
+            float amplitude = 1.0f;
+            float totalAmplitude = 0.0f;
+            for (int octave = octaves - 1; octave >= 0; octave--) {
+                amplitude *= persistance;
+                totalAmplitude += amplitude;
+                for (int i = 0; i < width; i++) {
+                    for (int j = 0; j < height; j++) {
+                        perlinNoise[i][j] += smoothNoise[octave][i][j] * amplitude;
+                    }
+                }
+            }
+            //normalisation
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    //We need to normalize to the total aplitude - sort of like clamping to normalized coords.
+                    perlinNoise[i][j] /= totalAmplitude;
+                }
+            }
+            for(int i = 0; i < width * height; i++) {
+                int col = i % width;
+                int row = i / width;                
+                returnValue[i] = perlinNoise[col][row];
+            }
 
             return returnValue;
         }

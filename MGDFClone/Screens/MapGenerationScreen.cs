@@ -15,7 +15,7 @@ public class MapGenerationScreen : ScreenBase {
     float _camSpeed = 8.0f;
     private float[][] m_elevationMap;
     //private int mapWidth = 100, mapHeight = 75;
-    private int mapWidth = 25, mapHeight = 25;
+    private int mapWidth = 75, mapHeight = 25;
     private const int regionSize = 16;
 
     private float[] m_heightMap;
@@ -29,7 +29,8 @@ public class MapGenerationScreen : ScreenBase {
 
     public override void LoadContent() {
         //width,height overworld tiles, which consist of 16x16 regions
-        m_heightMap = PerlinNoiseV2.GeneratePerlinNoise(mapWidth, mapHeight, 4);
+        //m_heightMap = PerlinNoiseV2.GeneratePerlinNoise(mapWidth, mapHeight, 4);
+        m_heightMap = PerlinNoiseV3.GeneratePerlinNoise(mapWidth, mapHeight, 4);
         for (int i = 0; i < m_heightMap.Length; i++) {
             Entity tile = _world.CreateEntity();
             eSprite sprite = eSprite.None;
