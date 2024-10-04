@@ -15,7 +15,7 @@ public class MapGenerationScreen : ScreenBase {
     float _camSpeed = 8.0f;
     private float[][] m_elevationMap;
     //private int mapWidth = 100, mapHeight = 75;
-    private int mapWidth = 75, mapHeight = 25;
+    private int mapWidth = 75, mapHeight = 75;
     private const int regionSize = 16;
 
     private float[] m_heightMap;

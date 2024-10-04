@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MGDFClone.Features {
+﻿namespace MGDFClone.Features {
     public static class PerlinNoiseV3 {
         static Random random = new Random();
         public static float[] GeneratePerlinNoise(int width, int height, int octaves) {
