@@ -6,32 +6,30 @@ public static class PerlinNoiseV4 {
         float[] perlinNoise = new float[width * height];
         //Generate essentially static
         float[] whiteNoise = _generateWhiteNoise(width, height);
-        float[][] smootheNoise = new float [octaves][];
-        float persistance = 0.7f;
+        float[][] smoothNoise = new float [octaves][];
+        float persistence = 0.7f;
         for (int i = 0; i < octaves; i++) {
             //We're building up a list of smooth noise. To visualize:
             //octave1: [x,x,x,x,x,x,x,x,x]
             //octave2: [x,x,x,x,x,x,x,x,x]
             //octave3: [x,x,x,x,x,x,x,x,x]
-            smootheNoise[i] = _generateSmoothNoise(whiteNoise, width, height, octaves);
+            smoothNoise[i] = _generateSmoothNoise(whiteNoise, width, height, octaves);
         }
         float amplitude = 1.0f;
         float totalAmplitude = 0.0f;
+        // Blend noise together
         for (int octave = octaves - 1; octave >= 0; octave--) {
-            amplitude *= persistance;
+            amplitude *= persistence;
             totalAmplitude += amplitude;
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    int index = j *  width + i;
-                    perlinNoise[index] += smootheNoise[octave][index] * amplitude;
-                }
+
+            // For each position in the grid, calculate the flat index
+            for (int index = 0; index < perlinNoise.Length; index++) {
+                perlinNoise[index] += smoothNoise[octave][index] * amplitude;
             }
         }
-        for (int i = 0; i < width; i++) {
-            for(int j = 0; j < height; j++) {
-                int index = j * width + i;
-                perlinNoise[index] /= totalAmplitude;
-            }
+        //Normalize
+        for (int index = 0; index < perlinNoise.Length; index++) {
+            perlinNoise[index] /= totalAmplitude;
         }
         return perlinNoise;
     }
@@ -57,6 +55,7 @@ public static class PerlinNoiseV4 {
                 //How much of an influence the horizontally neighborgs will have on the current position
                 float vertical_blend = (j - sample_j0) * sampleFrequency;
 
+                //Get the indexes
                 int topLeftIndex = sample_j0 * width + sample_i0;
                 int topRightIndex = sample_j0 * width + sample_i1;
                 int bottomLeftIndex = sample_j1 * width + sample_i0;
