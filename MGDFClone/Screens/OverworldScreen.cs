@@ -80,7 +80,8 @@ public class OverworldScreen : ScreenBase {
                 tileEntity.Set(new DrawInfoComponent {
                     Sprite = sprite,
                     Color = color,
-                    Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE)
+                    Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE),
+                    Alpha = 1.0f
                 });
             }
 

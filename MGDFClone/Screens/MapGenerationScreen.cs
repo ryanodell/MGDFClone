@@ -82,7 +82,8 @@ public class MapGenerationScreen : ScreenBase {
             tile.Set(new DrawInfoComponent {
                 Sprite = sprite,
                 Color = color,
-                Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE)
+                Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                Alpha = 1.0f
             });
         }
 
@@ -158,7 +159,8 @@ public class MapGenerationScreen : ScreenBase {
         tile.Set(new DrawInfoComponent {
             Sprite = sprite,
             Color = color,
-            Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE)
+            Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE),
+            Alpha = 1.0f
         });
     }
 

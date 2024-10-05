@@ -113,7 +113,8 @@ namespace MGDFClone.Screens
                 tile.Set(new DrawInfoComponent {
                     Sprite = sprite,
                     Color = color,
-                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE)
+                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                    Alpha = 1.0f
                 });
             }
             Log.Logger.Debug("Drew Ocave: " + _currentOcataveBorked);
