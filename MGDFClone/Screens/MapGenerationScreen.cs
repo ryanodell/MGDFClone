@@ -116,6 +116,16 @@ public class MapGenerationScreen : ScreenBase {
         eTileMapType eTileMapType = eTileMapType.None;
         float value = m_elevationMap[i][j];
         eTileMapType = _determineBaseTerrain(value);
+        _setSpriteData(ref sprite, ref color, eTileMapType);
+        tile.Set(new DrawInfoComponent {
+            Sprite = sprite,
+            Color = color,
+            Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE),
+            Alpha = 1.0f
+        });
+    }
+
+    private static void _setSpriteData(ref eSprite sprite, ref Color color, eTileMapType eTileMapType) {
         switch (eTileMapType) {
             case eTileMapType.DeepWater:
                 sprite = eSprite.Water2;
@@ -156,12 +166,6 @@ public class MapGenerationScreen : ScreenBase {
             default:
                 break;
         }
-        tile.Set(new DrawInfoComponent {
-            Sprite = sprite,
-            Color = color,
-            Position = new Vector2(j * Globals.TILE_SIZE, i * Globals.TILE_SIZE),
-            Alpha = 1.0f
-        });
     }
 
     private eTileMapType _determineBaseTerrain(float elevationValue) {
