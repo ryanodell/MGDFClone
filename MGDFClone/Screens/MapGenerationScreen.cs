@@ -31,7 +31,7 @@ public class MapGenerationScreen : ScreenBase {
     public override void LoadContent() {
         //width,height overworld tiles, which consist of 16x16 regions
         //m_heightMap = PerlinNoiseV2.GeneratePerlinNoise(mapWidth, mapHeight, 4);
-        m_heightMap = PerlinNoiseV3.GeneratePerlinNoise(mapWidth, mapHeight, 4);
+        m_heightMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 4);
         for (int i = 0; i < m_heightMap.Length; i++) {
             Entity tile = _world.CreateEntity();
             eSprite sprite = eSprite.None;
