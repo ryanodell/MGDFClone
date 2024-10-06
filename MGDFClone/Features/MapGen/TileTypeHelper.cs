@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Serilog;
 
 namespace MGDFClone.Features.MapGen {
     public static class TileTypeHelper {
@@ -20,6 +21,60 @@ namespace MGDFClone.Features.MapGen {
             else
                 return eTileMapType.Snow; // Highest = Snow
         }
+
+        public static eSprite DetermineTemperatureTile(float value) {
+            switch (value) {
+                case < -50.0f:
+                    return eSprite.CapitalZ;
+                case < -30.0f:
+                    return eSprite.CapitalY;
+                case < -20.0f:
+                    return eSprite.CapitalX;
+                case < 0.0f:
+                    return eSprite.CapitalO;
+                case < 20.0f:
+                    return eSprite.Number2;
+                case < 40.0f:
+                    return eSprite.Number4;
+                case < 60.0f:
+                    return eSprite.Number6;
+                case < 80.0f:
+                    return eSprite.Number8;
+                case < 100.0f:
+                    return eSprite.Number9;
+                case < 120.0f:
+                    return eSprite.House;
+                default:
+                    return eSprite.CapitalA;
+            }
+        }
+        public static Color DetermineTemperatureColor(float value) {
+            switch (value) {
+                case < -50.0f:
+                    return Color.White;
+                case < -30.0f:
+                    return Color.LightGray;
+                case < -20.0f:
+                    return Color.Gray;
+                case < 0.0f:
+                    return Color.DarkGray;
+                case < 20.0f:
+                    return Color.Blue;
+                case < 40.0f:
+                    return Color.DarkBlue;
+                case < 60.0f:
+                    return Color.Green;
+                case < 80.0f:
+                    return Color.DarkGreen;
+                case < 100.0f:
+                    return Color.LightYellow;
+                case < 120.0f:
+                    return Color.Red;
+                default:
+                    return Color.DarkRed;
+            }
+        }
+
 
         public static void SetSpriteData(ref eSprite sprite, ref Color color, eTileMapType eTileMapType) {
             switch (eTileMapType) {

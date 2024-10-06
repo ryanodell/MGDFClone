@@ -7,17 +7,24 @@ using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Serilog;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace MGDFClone.Screens {
     public class ClimateGenerationScreen : ScreenBase {
         private float _camSpeed = 8.0f;
-        private readonly int mapWidth = 75, mapHeight = 75;
+        private readonly int mapWidth = 50, mapHeight = 50;
         private World _world;
         private Camera2D _camera;
         private readonly RenderSystem _renderSystem;
         private float[] _heightMap;
-        private float[] _rainMesh;
+        //In F
+        private float _minTemp = -40.0f;
+        private float _maxTemp = 110.0f;
+        private float _waterCoolingFactor = 10.0f;
+        private float _waterTemperature = 50.0f;
+        private float[] _temperatureMap;
+        private float _waterElevation = 0.30f;
 
         public ClimateGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
@@ -25,16 +32,29 @@ namespace MGDFClone.Screens {
             _camera.Zoom = 3.5f;
             _camera.LookAt(Vector2.Zero);
             _renderSystem = new RenderSystem(_world, _spriteBatch, _camera);
+            _temperatureMap = new float[mapWidth * mapHeight];
         }
 
         public override void LoadContent() {
-            _heightMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 3);
+            _heightMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 4);
             for (int i = 0; i < _heightMap.Length; i++) {
+                int row = i / mapWidth;
+                int column = i % mapWidth;
+                float elevation = _heightMap[i];
+                float latitudeFactor = row / (float)(mapHeight - 1);
+                //latitudeFactor = latitudeFactor * latitudeFactor;
+                //latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
+                float baseTemperature = _maxTemp - latitudeFactor * (_maxTemp - _minTemp);
+                float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
+                if (elevation < _waterElevation) {
+                    float waterBlendFactor = (elevation / _waterElevation);
+                    adjustedTemperature = MathHelper.Lerp(_waterTemperature, adjustedTemperature, waterBlendFactor);
+                }
+                _temperatureMap[i] = adjustedTemperature;
+
                 Entity tile = _world.CreateEntity();
                 eSprite sprite = eSprite.None;
                 Color color = Color.White;
-                int row = i / mapWidth;
-                int column = i % mapWidth;
                 var tileType = TileTypeHelper.DetermineBaseTerrain(_heightMap[i]);
                 TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
                 tile.Set(new DrawInfoComponent {
@@ -43,12 +63,22 @@ namespace MGDFClone.Screens {
                     Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
                     Alpha = 1.0f
                 });
+                Entity temperatureTile = _world.CreateEntity();
+                temperatureTile.Set(new DrawInfoComponent {
+                    Sprite = TileTypeHelper.DetermineTemperatureTile(_temperatureMap[i]),
+                    Color = TileTypeHelper.DetermineTemperatureColor(_temperatureMap[i]),
+                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                    Alpha = 0.3f
+                });
             }
+            Log.Logger.Information($"Max Temp: {_temperatureMap.Max()}");
+            Log.Logger.Information($"Min Temp: {_temperatureMap.Min()}");
+            Log.Logger.Information($"Avg Temp: {_temperatureMap.Average()}");
         }
 
 
         public override void UnloadContent() {
-            
+
         }
 
         public override void Update(GameTime gameTime) {
