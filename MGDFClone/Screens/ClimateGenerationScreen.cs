@@ -18,6 +18,8 @@ namespace MGDFClone.Screens {
         private Camera2D _camera;
         private readonly RenderSystem _renderSystem;
         private float[] _heightMap;
+
+        ///////////////////////////////////////////////////Temperature related/////////////////////////////////////////////
         private float _minTemp = -40.0f;
         private float _maxTemp = 110.0f;
         private float _waterCoolingFactor = 10.0f;
@@ -36,9 +38,14 @@ namespace MGDFClone.Screens {
             { Season.Summer, 20.0f },    // Summer is 20°F warmer.
             { Season.Autumn, 0.0f }      // Autumn has no change.
         };
-
-        List<Entity> temperatureTiles = new List<Entity>();
+        List<Entity> temperatureTiles = new List<Entity>();        
         private bool _showTemp = true;
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////Atmosphere related/////////////////////////////////////////////
+        private float[] _initialHumidityMap;
+        private float[] _finalHumidityMap;
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public ClimateGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
@@ -47,10 +54,13 @@ namespace MGDFClone.Screens {
             _camera.LookAt(Vector2.Zero);
             _renderSystem = new RenderSystem(_world, _spriteBatch, _camera);
             _temperatureMap = new float[mapWidth * mapHeight];
+            _initialHumidityMap = new float[mapWidth * mapHeight];
+            _finalHumidityMap = new float[mapWidth * mapHeight];
         }
 
         public override void LoadContent() {
             _heightMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 3);
+            _initialHumidityMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 5);
             for (int i = 0; i < _heightMap.Length; i++) {
                 int row = i / mapWidth;
                 int column = i % mapWidth;
@@ -69,6 +79,21 @@ namespace MGDFClone.Screens {
             _calculateTemperatures();
             _addTemperateSprites();
             _logTemperatureDetails();
+            for (int i = 0; i < _heightMap.Length; i++) {
+                int row = i / mapWidth;
+                int column = i % mapWidth;
+                //Get the base moisture from the western most tile
+                float moisture = _initialHumidityMap[row];
+                float temperature = _temperatureMap[i];
+                float moistureCapacity = _calculateMoistureCapacity(temperature);
+                float height = _heightMap[i];
+
+            }
+        }
+
+        private float _calculateMoistureCapacity(float temperature) {
+
+            return 1.0f;
         }
 
         private void _logTemperatureDetails() {
