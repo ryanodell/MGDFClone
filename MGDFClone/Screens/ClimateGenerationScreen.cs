@@ -32,7 +32,7 @@ namespace MGDFClone.Screens {
         float lapseRate = 6.5f;
         // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F
         //float lapseRateF = 13.7f;
-        float lapseRateF = 25.7f;
+        float lapseRateF = 11.7f;
         Season currentSeason = Season.Spring;
 
         // Define the temperature modifiers for each season.
