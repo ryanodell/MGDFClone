@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Serilog;
+using System;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace MGDFClone.Screens {
@@ -45,10 +46,15 @@ namespace MGDFClone.Screens {
         ///////////////////////////////////////////////////Atmosphere related/////////////////////////////////////////////
         private float[] _initialHumidityMap;
         private float[] _finalHumidityMap;
-        private float _mountainThreshold = 0.85f;
-        private float _percipitationFactor = 0.5f;
-        private float _rainShadowEffect = 0.05f;
-        private float _eastwardDissipation = 0.7f;
+        //private float _mountainThreshold = 0.85f;
+        //private float _percipitationFactor = 0.5f;
+        //private float _rainShadowEffect = 0.05f;
+        //private float _eastwardDissipation = 0.7f;
+        private float _mountainThreshold = 0.8f;      // Elevation threshold for mountains
+        private float _percipitationFactor = 0.6f;    // How much moisture is deposited by mountains
+        private float _rainShadowEffect = 0.2f;       // Percentage of remaining moisture after crossing mountains
+        private float _eastwardDissipation = 0.85f;   // Eastward dissipation of moisture
+
         List<Entity> humidityTiles = new List<Entity>();
         private bool _showHumidityMap = true;
         private float _minimumHumidity = 0.0f;
@@ -75,7 +81,7 @@ namespace MGDFClone.Screens {
                 Entity tile = _world.CreateEntity();
                 eSprite sprite = eSprite.None;
                 Color color = Color.White;
-                var tileType = TileTypeHelper.DetermineBaseTerrain(_heightMap[i]);
+                var tileType = TileTypeHelper.DetermineBaseTerrain(_heightMap[i]);                
                 TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
                 tile.Set(new DrawInfoComponent {
                     Sprite = sprite,
@@ -94,23 +100,97 @@ namespace MGDFClone.Screens {
 
         private void _calculateHumidity() {
             for (int y = 0; y < mapHeight; y++) {
-                //West-most tile for current row
+                // Start with an initial moisture level for the leftmost tile in the row
                 float moisture = _initialHumidityMap[y];
+
                 for (int x = 0; x < mapWidth; x++) {
-                    int index = y + x;
+                    int index = y * mapWidth + x;  // Calculate the index for the current tile
+
+                    // Get the relevant map data for this tile
                     float temperature = _temperatureMap[index];
                     float moistureCapacity = _calculateMoistureCapacity(temperature);
                     float height = _heightMap[index];
-                    if (height > _mountainThreshold) {
-                        _initialHumidityMap[index] += moisture * _percipitationFactor;
-                        moisture *= _rainShadowEffect;
+
+                    // If the tile is water, add extra moisture to simulate evaporation
+                    if (height < 0.30f) {
+                        moisture += 20.0f;  // Increase moisture for water tiles (adjust this value as needed)
                     }
-                    moisture = Math.Min(moisture, moistureCapacity);
-                    _finalHumidityMap[index] = moisture;
+
+                    // If the tile is a mountain, deposit moisture and reduce the remaining amount
+                    if (height > _mountainThreshold) {
+                        _finalHumidityMap[index] = Math.Min(moisture * _percipitationFactor, moistureCapacity);  // Deposit some moisture
+                        moisture *= _rainShadowEffect;  // Remaining moisture is greatly reduced by rain shadow
+                    } else {
+                        // Non-mountain tiles absorb moisture up to their capacity
+                        moisture = Math.Min(moisture, moistureCapacity);
+                        _finalHumidityMap[index] = moisture;
+                    }
+
+                    // Apply dissipation as moisture moves eastward
                     moisture *= _eastwardDissipation;
                 }
             }
+
+            // Optional: Normalize or scale the humidity values between 0 and 100
+            for (int i = 0; i < _finalHumidityMap.Length; i++) {
+                _finalHumidityMap[i] = Math.Clamp(_finalHumidityMap[i], _minimumHumidity, _maximumHunidty);
+            }
         }
+
+
+        //private void _calculateHumidity() {
+        //    for (int y = 0; y < mapHeight; y++) {
+        //        // Start with an initial moisture level for the leftmost tile in the row
+        //        float moisture = _initialHumidityMap[y];
+
+        //        for (int x = 0; x < mapWidth; x++) {
+        //            int index = y * mapWidth + x;  // Calculate the index for the current tile
+
+        //            // Get the relevant map data for this tile
+        //            float temperature = _temperatureMap[index];
+        //            float moistureCapacity = _calculateMoistureCapacity(temperature);
+        //            float height = _heightMap[index];
+
+        //            // If the tile is a mountain, deposit moisture and reduce the remaining amount
+        //            if (height > _mountainThreshold) {
+        //                _finalHumidityMap[index] = Math.Min(moisture * _percipitationFactor, moistureCapacity); // Deposit some moisture
+        //                moisture *= _rainShadowEffect;  // Remaining moisture is greatly reduced by rain shadow
+        //            } else {
+        //                // Non-mountain tiles absorb moisture up to their capacity
+        //                moisture = Math.Min(moisture, moistureCapacity);
+        //                _finalHumidityMap[index] = moisture;
+        //            }
+
+        //            // Apply dissipation as moisture moves eastward
+        //            moisture *= _eastwardDissipation;
+        //        }
+        //    }
+
+        //    // Optional: Normalize or scale the humidity values between 0 and 100
+        //    for (int i = 0; i < _finalHumidityMap.Length; i++) {
+        //        _finalHumidityMap[i] = Math.Clamp(_finalHumidityMap[i], _minimumHumidity, _maximumHunidty);
+        //    }
+        //}
+
+        //private void _calculateHumidity() {
+        //    for (int y = 0; y < mapHeight; y++) {
+        //        //West-most tile for current row
+        //        float moisture = _initialHumidityMap[y];
+        //        for (int x = 0; x < mapWidth; x++) {
+        //            int index = y + x;
+        //            float temperature = _temperatureMap[index];
+        //            float moistureCapacity = _calculateMoistureCapacity(temperature);
+        //            float height = _heightMap[index];
+        //            if (height > _mountainThreshold) {
+        //                _initialHumidityMap[index] += moisture * _percipitationFactor;
+        //                moisture *= _rainShadowEffect;
+        //            }
+        //            moisture = Math.Min(moisture, moistureCapacity);
+        //            _finalHumidityMap[index] = moisture;
+        //            moisture *= _eastwardDissipation;
+        //        }
+        //    }
+        //}
 
         private void _addHumiditySprites() {
             for (int i = 0; i < _finalHumidityMap.Length; i++) {
@@ -120,7 +200,7 @@ namespace MGDFClone.Screens {
                 Entity humidity = _world.CreateEntity();
                 humidity.Set(new DrawInfoComponent {
                     Sprite = eSprite.CapitalO,
-                    Color = TileTypeHelper.DetermineHumidityColor(_finalHumidityMap[i]),
+                    Color = TileTypeHelper.DetermineHumidityColor(_finalHumidityMap[i] * 100.0f),
                     Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
                     Alpha = 1.0f
                 });
@@ -135,9 +215,19 @@ namespace MGDFClone.Screens {
             humidityTiles.Clear();
         }
 
+        //private float _calculateMoistureCapacity(float temperature) {
+        //    return Math.Max(0.0f, (temperature + 50.0f) * 0.5f);  // Adjust the base and scaling factor
+        //}
+
         private float _calculateMoistureCapacity(float temperature) {
-            return 0.3f;
+            return (float)Math.Exp(temperature / 10.0f) - 1.0f;  // Adjust parameters to suit your map's temperature scale
         }
+
+
+
+        //private float _calculateMoistureCapacity(float temperature) {
+        //    return temperature * 8.3f;
+        //}
 
         private void _logHumidityDetails() {
             Log.Logger.Information($"Season: {currentSeason.ToString()}");
