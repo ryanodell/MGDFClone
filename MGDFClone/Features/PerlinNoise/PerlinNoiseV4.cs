@@ -1,6 +1,16 @@
-﻿namespace MGDFClone.Features.PerlinNoise; 
+﻿using System.Security.Cryptography;
+using System.Text;
+
+namespace MGDFClone.Features.PerlinNoise; 
 public static class PerlinNoiseV4 {
+    //private static Random random = GetRNG("Test");
     private static Random random = new Random();
+
+    private static Random GetRNG(string seed) {
+        using var algo = SHA1.Create();
+        var hash = BitConverter.ToInt32(algo.ComputeHash(Encoding.UTF8.GetBytes(seed)));
+        return new Random(hash);
+    }
 
     public static float[] GeneratePerlinNoise(int width, int height, int octaves) {            
         float[] perlinNoise = new float[width * height];
