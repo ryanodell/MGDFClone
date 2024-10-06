@@ -105,32 +105,6 @@ namespace MGDFClone.Features.MapGen {
                 default:
                     return Color.White;         // Max Heat
             }
-
-            //return Color.White;
-            //switch (value) {
-            //    case < -50.0f:
-            //        return Color.White;
-            //    case < -30.0f:
-            //        return Color.LightGray;
-            //    case < -20.0f:
-            //        return Color.Gray;
-            //    case < 0.0f:
-            //        return Color.DarkGray;
-            //    case < 20.0f:
-            //        return Color.Blue;
-            //    case < 40.0f:
-            //        return Color.DarkBlue;
-            //    case < 60.0f:
-            //        return Color.Green;
-            //    case < 80.0f:
-            //        return Color.DarkGreen;
-            //    case < 100.0f:
-            //        return Color.LightYellow;
-            //    case < 120.0f:
-            //        return Color.Red;
-            //    default:
-            //        return Color.DarkRed;
-            //}
         }
 
 

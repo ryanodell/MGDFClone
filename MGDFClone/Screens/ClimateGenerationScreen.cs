@@ -31,13 +31,14 @@ namespace MGDFClone.Screens {
         // Lapse rate in °C per 1000 meters (standard value).
         float lapseRate = 6.5f;
         // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F
-        float lapseRateF = 13.7f;
+        //float lapseRateF = 13.7f;
+        float lapseRateF = 25.7f;
         Season currentSeason = Season.Spring;
 
         // Define the temperature modifiers for each season.
         // These can be positive or negative depending on how you want the temperature to change.
         Dictionary<Season, float> SeasonalTemperatureOffsets = new Dictionary<Season, float>() {
-            { Season.Winter, -30.0f },   // Winter is 30°F colder.
+            { Season.Winter, -20.0f },   // Winter is 20°F colder.
             { Season.Spring, 5.0f },     // Spring is 5°F warmer.
             { Season.Summer, 20.0f },    // Summer is 20°F warmer.
             { Season.Autumn, 0.0f }      // Autumn has no change.
@@ -74,9 +75,15 @@ namespace MGDFClone.Screens {
             }
             _calculateTemperatures();
             _addTemperateSprites();
+            _logTemperatureDetails();
+        }
+
+        private void _logTemperatureDetails() {
+            Log.Logger.Information($"Season: {currentSeason.ToString()}");
             Log.Logger.Information($"Max Temp: {_temperatureMap.Max()}");
             Log.Logger.Information($"Min Temp: {_temperatureMap.Min()}");
             Log.Logger.Information($"Avg Temp: {_temperatureMap.Average()}");
+            Log.Logger.Information($"____________________________________");
         }
 
         private void _clearTemperatureSprites() {
@@ -87,18 +94,20 @@ namespace MGDFClone.Screens {
         }
 
         private void _addTemperateSprites() {
-            for (int i = 0; i < _heightMap.Length; i++) {
-                int row = i / mapWidth;
-                int column = i % mapWidth;
-                float elevation = _heightMap[i];
-                Entity temperatureTile = _world.CreateEntity();
-                temperatureTile.Set(new DrawInfoComponent {
-                    Sprite = TileTypeHelper.DetermineTemperatureTile(_temperatureMap[i]),
-                    Color = TileTypeHelper.DetermineTemperatureColor(_temperatureMap[i]),
-                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                    Alpha = 1.0f
-                });
-                temperatureTiles.Add(temperatureTile);
+            if (_showTemp) {
+                for (int i = 0; i < _heightMap.Length; i++) {
+                    int row = i / mapWidth;
+                    int column = i % mapWidth;
+                    float elevation = _heightMap[i];
+                    Entity temperatureTile = _world.CreateEntity();
+                    temperatureTile.Set(new DrawInfoComponent {
+                        Sprite = TileTypeHelper.DetermineTemperatureTile(_temperatureMap[i]),
+                        Color = TileTypeHelper.DetermineTemperatureColor(_temperatureMap[i]),
+                        Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                        Alpha = 1.0f
+                    });
+                    temperatureTiles.Add(temperatureTile);
+                }
             }
         }
 
@@ -128,6 +137,7 @@ namespace MGDFClone.Screens {
                 adjustedTemperature += seasonalOffset;
                 _temperatureMap[i] = adjustedTemperature;
             }
+            _logTemperatureDetails();
         }
 
 
@@ -139,43 +149,35 @@ namespace MGDFClone.Screens {
             _handleCameraMovement();
             if(_inputManager.JustReleased(Keys.OemTilde)) {
                 _showTemp = !_showTemp;
-                if (_showTemp) {
+                if (!_showTemp) {
                     _clearTemperatureSprites();
                 } else {
                     _addTemperateSprites();
-                }
+                }                
             }
             if (_inputManager.JustReleased(Keys.D1)) {
                 _clearTemperatureSprites();
                 currentSeason = Season.Winter;
                 _calculateTemperatures();
-                if (_showTemp) {
-                    _addTemperateSprites();
-                }
+                _addTemperateSprites();
             }
             if (_inputManager.JustReleased(Keys.D2)) {
                 _clearTemperatureSprites();
                 currentSeason = Season.Spring;
                 _calculateTemperatures();
-                if (_showTemp) {
-                    _addTemperateSprites();
-                }
+                _addTemperateSprites();
             }
             if (_inputManager.JustReleased(Keys.D3)) {
                 _clearTemperatureSprites();
                 currentSeason = Season.Summer;
                 _calculateTemperatures();
-                if (_showTemp) {
-                    _addTemperateSprites();
-                }
+                _addTemperateSprites();
             }
             if (_inputManager.JustReleased(Keys.D4)) {
                 _clearTemperatureSprites();
                 currentSeason = Season.Autumn;
                 _calculateTemperatures();
-                if (_showTemp) {
-                    _addTemperateSprites();
-                }
+                _addTemperateSprites();
             }
         }
 
