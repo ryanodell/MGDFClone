@@ -26,6 +26,25 @@ namespace MGDFClone.Screens {
         private float[] _temperatureMap;
         private float _waterElevation = 0.30f;
 
+        // Maximum elevation in meters (you can adjust this as needed).
+        float maxElevationInMeters = 3000.0f;
+
+        // Lapse rate in °C per 1000 meters (standard value).
+        float lapseRate = 6.5f;
+
+        // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F
+        float lapseRateF = 13.7f;
+        Season currentSeason = Season.Summer;
+
+        // Define the temperature modifiers for each season.
+        // These can be positive or negative depending on how you want the temperature to change.
+        Dictionary<Season, float> SeasonalTemperatureOffsets = new Dictionary<Season, float>() {
+            { Season.Winter, -30.0f },   // Winter is 30°F colder.
+            { Season.Spring, 5.0f },     // Spring is 5°F warmer.
+            { Season.Summer, 20.0f },    // Summer is 20°F warmer.
+            { Season.Autumn, 0.0f }      // Autumn has no change.
+        };
+
         public ClimateGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -36,7 +55,8 @@ namespace MGDFClone.Screens {
         }
 
         public override void LoadContent() {
-            _heightMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 4);
+            _heightMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 3);
+            float seasonalOffset = SeasonalTemperatureOffsets[currentSeason];
             for (int i = 0; i < _heightMap.Length; i++) {
                 int row = i / mapWidth;
                 int column = i % mapWidth;
@@ -45,11 +65,20 @@ namespace MGDFClone.Screens {
                 //latitudeFactor = latitudeFactor * latitudeFactor;
                 //latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
                 float baseTemperature = _maxTemp - latitudeFactor * (_maxTemp - _minTemp);
-                float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
+
+                // Calculate the temperature drop due to elevation.
+                float elevationInMeters = elevation * maxElevationInMeters;
+
+                // Calculate the cooling effect based on the elevation.
+                float elevationCooling = (elevationInMeters / 1000.0f) * lapseRateF;
+
+                //float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
+                float adjustedTemperature = baseTemperature - elevationCooling;
                 if (elevation < _waterElevation) {
                     float waterBlendFactor = (elevation / _waterElevation);
                     adjustedTemperature = MathHelper.Lerp(_waterTemperature, adjustedTemperature, waterBlendFactor);
                 }
+                adjustedTemperature += seasonalOffset;
                 _temperatureMap[i] = adjustedTemperature;
 
                 Entity tile = _world.CreateEntity();
@@ -68,7 +97,7 @@ namespace MGDFClone.Screens {
                     Sprite = TileTypeHelper.DetermineTemperatureTile(_temperatureMap[i]),
                     Color = TileTypeHelper.DetermineTemperatureColor(_temperatureMap[i]),
                     Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                    Alpha = 0.3f
+                    Alpha = 1.0f
                 });
             }
             Log.Logger.Information($"Max Temp: {_temperatureMap.Max()}");
@@ -115,4 +144,12 @@ namespace MGDFClone.Screens {
             }
         }
     }
+    // Seasonal temperature adjustments in °F.
+    public enum Season {
+        Winter,
+        Spring,
+        Summer,
+        Autumn
+    }
+
 }
