@@ -145,7 +145,38 @@ namespace MGDFClone.Screens {
                     _addTemperateSprites();
                 }
             }
-
+            if (_inputManager.JustReleased(Keys.D1)) {
+                _clearTemperatureSprites();
+                currentSeason = Season.Winter;
+                _calculateTemperatures();
+                if (_showTemp) {
+                    _addTemperateSprites();
+                }
+            }
+            if (_inputManager.JustReleased(Keys.D2)) {
+                _clearTemperatureSprites();
+                currentSeason = Season.Spring;
+                _calculateTemperatures();
+                if (_showTemp) {
+                    _addTemperateSprites();
+                }
+            }
+            if (_inputManager.JustReleased(Keys.D3)) {
+                _clearTemperatureSprites();
+                currentSeason = Season.Summer;
+                _calculateTemperatures();
+                if (_showTemp) {
+                    _addTemperateSprites();
+                }
+            }
+            if (_inputManager.JustReleased(Keys.D4)) {
+                _clearTemperatureSprites();
+                currentSeason = Season.Autumn;
+                _calculateTemperatures();
+                if (_showTemp) {
+                    _addTemperateSprites();
+                }
+            }
         }
 
         public override void Draw(GameTime gameTime) {
