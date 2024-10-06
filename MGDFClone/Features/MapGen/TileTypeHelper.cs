@@ -25,54 +25,112 @@ namespace MGDFClone.Features.MapGen {
         public static eSprite DetermineTemperatureTile(float value) {
             switch (value) {
                 case < -50.0f:
-                    return eSprite.CapitalZ;
+                    return eSprite.CapitalF;
+                case < -40.0f:
+                    return eSprite.CapitalE;
                 case < -30.0f:
-                    return eSprite.CapitalY;
+                    return eSprite.CapitalD;
                 case < -20.0f:
-                    return eSprite.CapitalX;
-                case < 0.0f:
-                    return eSprite.CapitalO;
+                    return eSprite.CapitalC;
+                case < -10.0f:
+                    return eSprite.CapitalB;
+                case < 1.0f:
+                    return eSprite.CapitalA;
+                case < 10.0f:
+                    return eSprite.Number1;
                 case < 20.0f:
                     return eSprite.Number2;
+                case < 30.0f:
+                    return eSprite.Number3;
                 case < 40.0f:
                     return eSprite.Number4;
+                case < 50.0f:
+                    return eSprite.Number5;
                 case < 60.0f:
                     return eSprite.Number6;
+                case < 70.0f:
+                    return eSprite.Number7;
                 case < 80.0f:
                     return eSprite.Number8;
-                case < 100.0f:
+                case < 90.0f:
                     return eSprite.Number9;
+                case < 100.0f:
+                    return eSprite.CapitalW;
+                case < 110.0f:
+                    return eSprite.CapitalX;
                 case < 120.0f:
-                    return eSprite.House;
+                    return eSprite.CapitalY;
                 default:
-                    return eSprite.CapitalA;
+                    return eSprite.CapitalZ;
             }
         }
         public static Color DetermineTemperatureColor(float value) {
             switch (value) {
                 case < -50.0f:
-                    return Color.White;
+                    return Color.DarkBlue;      // Very Cold
+                case < -40.0f:
+                    return Color.Blue;          // Cold
                 case < -30.0f:
-                    return Color.LightGray;
+                    return Color.CornflowerBlue; // Slightly Cold
                 case < -20.0f:
-                    return Color.Gray;
-                case < 0.0f:
-                    return Color.DarkGray;
+                    return Color.LightSkyBlue;  // Chilly
+                case < -10.0f:
+                    return Color.Aquamarine;    // Cool
+                case < 1.0f:
+                    return Color.LightGreen;    // Mild
+                case < 10.0f:
+                    return Color.Green;         // Warm
                 case < 20.0f:
-                    return Color.Blue;
+                    return Color.YellowGreen;   // Warmer
+                case < 30.0f:
+                    return Color.Yellow;        // Moderate Heat
                 case < 40.0f:
-                    return Color.DarkBlue;
+                    return Color.Gold;          // Hotter
+                case < 50.0f:
+                    return Color.Orange;        // Very Hot
                 case < 60.0f:
-                    return Color.Green;
+                    return Color.OrangeRed;     // Scorching
+                case < 70.0f:
+                    return Color.Red;           // Extremely Hot
                 case < 80.0f:
-                    return Color.DarkGreen;
+                    return Color.DarkRed;       // Dangerously Hot
+                case < 90.0f:
+                    return Color.Maroon;        // Intense Heat
                 case < 100.0f:
-                    return Color.LightYellow;
+                    return Color.Purple;        // Extreme Heat
+                case < 110.0f:
+                    return Color.Magenta;       // Superheated
                 case < 120.0f:
-                    return Color.Red;
+                    return Color.HotPink;       // Overheated
                 default:
-                    return Color.DarkRed;
+                    return Color.White;         // Max Heat
             }
+
+            //return Color.White;
+            //switch (value) {
+            //    case < -50.0f:
+            //        return Color.White;
+            //    case < -30.0f:
+            //        return Color.LightGray;
+            //    case < -20.0f:
+            //        return Color.Gray;
+            //    case < 0.0f:
+            //        return Color.DarkGray;
+            //    case < 20.0f:
+            //        return Color.Blue;
+            //    case < 40.0f:
+            //        return Color.DarkBlue;
+            //    case < 60.0f:
+            //        return Color.Green;
+            //    case < 80.0f:
+            //        return Color.DarkGreen;
+            //    case < 100.0f:
+            //        return Color.LightYellow;
+            //    case < 120.0f:
+            //        return Color.Red;
+            //    default:
+            //        return Color.DarkRed;
+            //}
         }
 
 
