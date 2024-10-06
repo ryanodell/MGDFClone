@@ -4,4 +4,5 @@ Screenshot of map gen:
 ![Screenshot of the application](https://github.com/ryanodell/MGDFClone/blob/main/PerlinNoiseExample1.png)
 
 Screenshot of temperature:
+
 ![Screenshot of the application](https://github.com/ryanodell/MGDFClone/blob/main/PerlinNoiseExample2.png)
