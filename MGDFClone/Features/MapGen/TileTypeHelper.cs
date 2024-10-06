@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Serilog;
 
 namespace MGDFClone.Features.MapGen {
@@ -64,6 +65,34 @@ namespace MGDFClone.Features.MapGen {
                     return eSprite.CapitalZ;
             }
         }
+        public static Color DetermineHumidityColor(float value) {
+            switch (value) {
+                case < 10.0f:
+                    return Color.SaddleBrown;      // Very Dry (Desert-like)
+                case < 20.0f:
+                    return Color.Tan;              // Low Humidity
+                case < 30.0f:
+                    return Color.Goldenrod;        // Moderately Low
+                case < 40.0f:
+                    return Color.YellowGreen;      // Slightly Humid
+                case < 50.0f:
+                    return Color.Green;            // Balanced Humidity
+                case < 60.0f:
+                    return Color.MediumSeaGreen;   // Moderately Humid
+                case < 70.0f:
+                    return Color.LightSeaGreen;    // High Humidity
+                case < 80.0f:
+                    return Color.SkyBlue;          // Very High Humidity
+                case < 90.0f:
+                    return Color.CornflowerBlue;   // Saturated
+                case <= 100.0f:
+                    return Color.DarkBlue;         // Excessive Moisture
+                default:
+                    return Color.White;            // Out of Range
+            }
+        }
+
+
         public static Color DetermineTemperatureColor(float value) {
             switch (value) {
                 case < -50.0f:
@@ -106,7 +135,6 @@ namespace MGDFClone.Features.MapGen {
                     return Color.White;         // Max Heat
             }
         }
-
 
         public static void SetSpriteData(ref eSprite sprite, ref Color color, eTileMapType eTileMapType) {
             switch (eTileMapType) {

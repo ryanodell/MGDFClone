@@ -38,13 +38,21 @@ namespace MGDFClone.Screens {
             { Season.Summer, 20.0f },    // Summer is 20°F warmer.
             { Season.Autumn, 0.0f }      // Autumn has no change.
         };
-        List<Entity> temperatureTiles = new List<Entity>();        
-        private bool _showTemp = true;
+        List<Entity> temperatureTiles = new List<Entity>();
+        private bool _showTemp = false;
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         ///////////////////////////////////////////////////Atmosphere related/////////////////////////////////////////////
         private float[] _initialHumidityMap;
         private float[] _finalHumidityMap;
+        private float _mountainThreshold = 0.85f;
+        private float _percipitationFactor = 0.5f;
+        private float _rainShadowEffect = 0.05f;
+        private float _eastwardDissipation = 0.7f;
+        List<Entity> humidityTiles = new List<Entity>();
+        private bool _showHumidityMap = true;
+        private float _minimumHumidity = 0.0f;
+        private float _maximumHunidty = 100.0f;
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public ClimateGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
@@ -78,22 +86,65 @@ namespace MGDFClone.Screens {
             }
             _calculateTemperatures();
             _addTemperateSprites();
-            _logTemperatureDetails();
-            for (int i = 0; i < _heightMap.Length; i++) {
-                int row = i / mapWidth;
-                int column = i % mapWidth;
-                //Get the base moisture from the western most tile
-                float moisture = _initialHumidityMap[row];
-                float temperature = _temperatureMap[i];
-                float moistureCapacity = _calculateMoistureCapacity(temperature);
-                float height = _heightMap[i];
 
+            _calculateHumidity();
+            _addHumiditySprites();
+            _logHumidityDetails();
+        }
+
+        private void _calculateHumidity() {
+            for (int y = 0; y < mapHeight; y++) {
+                //West-most tile for current row
+                float moisture = _initialHumidityMap[y];
+                for (int x = 0; x < mapWidth; x++) {
+                    int index = y + x;
+                    float temperature = _temperatureMap[index];
+                    float moistureCapacity = _calculateMoistureCapacity(temperature);
+                    float height = _heightMap[index];
+                    if (height > _mountainThreshold) {
+                        _initialHumidityMap[index] += moisture * _percipitationFactor;
+                        moisture *= _rainShadowEffect;
+                    }
+                    moisture = Math.Min(moisture, moistureCapacity);
+                    _finalHumidityMap[index] = moisture;
+                    moisture *= _eastwardDissipation;
+                }
             }
         }
 
-        private float _calculateMoistureCapacity(float temperature) {
+        private void _addHumiditySprites() {
+            for (int i = 0; i < _finalHumidityMap.Length; i++) {
+                int row = i / mapWidth;
+                int column = i % mapWidth;
+                float elevation = _finalHumidityMap[i];
+                Entity humidity = _world.CreateEntity();
+                humidity.Set(new DrawInfoComponent {
+                    Sprite = eSprite.CapitalO,
+                    Color = TileTypeHelper.DetermineHumidityColor(_finalHumidityMap[i]),
+                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                    Alpha = 1.0f
+                });
+                humidityTiles.Add(humidity);
+            }
+        }
 
-            return 1.0f;
+        private void _clearHumiditySprites() {
+            foreach (var humTile in humidityTiles) {
+                humTile.Dispose();
+            }
+            humidityTiles.Clear();
+        }
+
+        private float _calculateMoistureCapacity(float temperature) {
+            return 0.3f;
+        }
+
+        private void _logHumidityDetails() {
+            Log.Logger.Information($"Season: {currentSeason.ToString()}");
+            Log.Logger.Information($"Max Humidity: {_finalHumidityMap.Max()}");
+            Log.Logger.Information($"Min Humidity: {_finalHumidityMap.Min()}");
+            Log.Logger.Information($"Avg Humidity: {_finalHumidityMap.Average()}");
+            Log.Logger.Information($"____________________________________");
         }
 
         private void _logTemperatureDetails() {
@@ -102,13 +153,6 @@ namespace MGDFClone.Screens {
             Log.Logger.Information($"Min Temp: {_temperatureMap.Min()}");
             Log.Logger.Information($"Avg Temp: {_temperatureMap.Average()}");
             Log.Logger.Information($"____________________________________");
-        }
-
-        private void _clearTemperatureSprites() {
-            foreach (var tempTile in temperatureTiles) {
-                tempTile.Disable();
-            }
-            temperatureTiles.Clear();
         }
 
         private void _addTemperateSprites() {
@@ -122,11 +166,18 @@ namespace MGDFClone.Screens {
                         Sprite = TileTypeHelper.DetermineTemperatureTile(_temperatureMap[i]),
                         Color = TileTypeHelper.DetermineTemperatureColor(_temperatureMap[i]),
                         Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                        Alpha = 1.0f
+                        Alpha = 0.650f
                     });
                     temperatureTiles.Add(temperatureTile);
                 }
             }
+        }
+
+        private void _clearTemperatureSprites() {
+            foreach (var tempTile in temperatureTiles) {
+                tempTile.Dispose();
+            }
+            temperatureTiles.Clear();
         }
 
         private void _calculateTemperatures() {
@@ -155,20 +206,25 @@ namespace MGDFClone.Screens {
             _logTemperatureDetails();
         }
 
-
-        public override void UnloadContent() {
-
-        }
+        public override void UnloadContent() { }
 
         public override void Update(GameTime gameTime) {
             _handleCameraMovement();
-            if(_inputManager.JustReleased(Keys.OemTilde)) {
+            if (_inputManager.JustReleased(Keys.Z)) {
                 _showTemp = !_showTemp;
                 if (!_showTemp) {
                     _clearTemperatureSprites();
                 } else {
                     _addTemperateSprites();
-                }                
+                }
+            }
+            if (_inputManager.JustReleased(Keys.X)) {
+                _showHumidityMap = !_showHumidityMap;
+                if (!_showHumidityMap) {
+                    _clearHumiditySprites();                    
+                } else {
+                    _addHumiditySprites();
+                }
             }
             if (_inputManager.JustReleased(Keys.D1)) {
                 _clearTemperatureSprites();
