@@ -18,25 +18,18 @@ namespace MGDFClone.Screens {
         private Camera2D _camera;
         private readonly RenderSystem _renderSystem;
         private float[] _heightMap;
-        //In F
         private float _minTemp = -40.0f;
         private float _maxTemp = 110.0f;
         private float _waterCoolingFactor = 10.0f;
         private float _waterTemperature = 50.0f;
         private float[] _temperatureMap;
-        private float _waterElevation = 0.30f;
-
+        //Offset to avoid overly hot beaches
+        private float _waterElevation = 0.60f;
         // Maximum elevation in meters
-        float maxElevationInMeters = 3000.0f;
-        // Lapse rate in °C per 1000 meters (standard value).
-        float lapseRate = 6.5f;
-        // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F
-        //float lapseRateF = 13.7f;
+        float maxElevationInMeters = 7000.0f;
+        // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F | 1000 meters (standard value).
         float lapseRateF = 11.7f;
         Season currentSeason = Season.Spring;
-
-        // Define the temperature modifiers for each season.
-        // These can be positive or negative depending on how you want the temperature to change.
         Dictionary<Season, float> SeasonalTemperatureOffsets = new Dictionary<Season, float>() {
             { Season.Winter, -20.0f },   // Winter is 20°F colder.
             { Season.Spring, 5.0f },     // Spring is 5°F warmer.
@@ -121,13 +114,10 @@ namespace MGDFClone.Screens {
                 latitudeFactor = latitudeFactor * latitudeFactor;
                 latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
                 float baseTemperature = _maxTemp - latitudeFactor * (_maxTemp - _minTemp);
-
                 // Calculate the temperature drop due to elevation.
                 float elevationInMeters = elevation * maxElevationInMeters;
-
                 // Calculate the cooling effect based on the elevation.
                 float elevationCooling = (elevationInMeters / 1000.0f) * lapseRateF;
-
                 //float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
                 float adjustedTemperature = baseTemperature - elevationCooling;
                 if (elevation < _waterElevation) {
