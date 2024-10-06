@@ -11,11 +11,11 @@ namespace MGDFClone.Features.MapGen {
                 return eTileMapType.Water; // Low elevation = Water
             else if (value < 0.35f)
                 return eTileMapType.Sand; // Slightly higher = Sand (beach)
-            else if (value < 0.50f)
+            else if (value < 0.60f)
                 return eTileMapType.Grass; // Middle = Grasslands
-            else if (value < 0.70f)
+            else if (value < 0.85f)
                 return eTileMapType.Hill; // Middle = Grasslands
-            else if (value < 0.80f)
+            else if (value < 0.90f)
                 return eTileMapType.Mountain; // Higher = Mountain
             else
                 return eTileMapType.Snow; // Highest = Snow
