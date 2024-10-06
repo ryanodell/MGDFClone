@@ -26,15 +26,13 @@ namespace MGDFClone.Screens {
         private float[] _temperatureMap;
         private float _waterElevation = 0.30f;
 
-        // Maximum elevation in meters (you can adjust this as needed).
+        // Maximum elevation in meters
         float maxElevationInMeters = 3000.0f;
-
         // Lapse rate in °C per 1000 meters (standard value).
         float lapseRate = 6.5f;
-
         // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F
         float lapseRateF = 13.7f;
-        Season currentSeason = Season.Summer;
+        Season currentSeason = Season.Spring;
 
         // Define the temperature modifiers for each season.
         // These can be positive or negative depending on how you want the temperature to change.
@@ -44,6 +42,9 @@ namespace MGDFClone.Screens {
             { Season.Summer, 20.0f },    // Summer is 20°F warmer.
             { Season.Autumn, 0.0f }      // Autumn has no change.
         };
+
+        List<Entity> temperatureTiles = new List<Entity>();
+        private bool _showTemp = true;
 
         public ClimateGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
@@ -56,14 +57,60 @@ namespace MGDFClone.Screens {
 
         public override void LoadContent() {
             _heightMap = PerlinNoiseV4.GeneratePerlinNoise(mapWidth, mapHeight, 3);
+            for (int i = 0; i < _heightMap.Length; i++) {
+                int row = i / mapWidth;
+                int column = i % mapWidth;
+                Entity tile = _world.CreateEntity();
+                eSprite sprite = eSprite.None;
+                Color color = Color.White;
+                var tileType = TileTypeHelper.DetermineBaseTerrain(_heightMap[i]);
+                TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
+                tile.Set(new DrawInfoComponent {
+                    Sprite = sprite,
+                    Color = color,
+                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                    Alpha = 1.0f
+                });
+            }
+            _calculateTemperatures();
+            _addTemperateSprites();
+            Log.Logger.Information($"Max Temp: {_temperatureMap.Max()}");
+            Log.Logger.Information($"Min Temp: {_temperatureMap.Min()}");
+            Log.Logger.Information($"Avg Temp: {_temperatureMap.Average()}");
+        }
+
+        private void _clearTemperatureSprites() {
+            foreach (var tempTile in temperatureTiles) {
+                tempTile.Disable();
+            }
+            temperatureTiles.Clear();
+        }
+
+        private void _addTemperateSprites() {
+            for (int i = 0; i < _heightMap.Length; i++) {
+                int row = i / mapWidth;
+                int column = i % mapWidth;
+                float elevation = _heightMap[i];
+                Entity temperatureTile = _world.CreateEntity();
+                temperatureTile.Set(new DrawInfoComponent {
+                    Sprite = TileTypeHelper.DetermineTemperatureTile(_temperatureMap[i]),
+                    Color = TileTypeHelper.DetermineTemperatureColor(_temperatureMap[i]),
+                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                    Alpha = 1.0f
+                });
+                temperatureTiles.Add(temperatureTile);
+            }
+        }
+
+        private void _calculateTemperatures() {
             float seasonalOffset = SeasonalTemperatureOffsets[currentSeason];
             for (int i = 0; i < _heightMap.Length; i++) {
                 int row = i / mapWidth;
                 int column = i % mapWidth;
                 float elevation = _heightMap[i];
                 float latitudeFactor = row / (float)(mapHeight - 1);
-                //latitudeFactor = latitudeFactor * latitudeFactor;
-                //latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
+                latitudeFactor = latitudeFactor * latitudeFactor;
+                latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
                 float baseTemperature = _maxTemp - latitudeFactor * (_maxTemp - _minTemp);
 
                 // Calculate the temperature drop due to elevation.
@@ -80,29 +127,7 @@ namespace MGDFClone.Screens {
                 }
                 adjustedTemperature += seasonalOffset;
                 _temperatureMap[i] = adjustedTemperature;
-
-                Entity tile = _world.CreateEntity();
-                eSprite sprite = eSprite.None;
-                Color color = Color.White;
-                var tileType = TileTypeHelper.DetermineBaseTerrain(_heightMap[i]);
-                TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
-                tile.Set(new DrawInfoComponent {
-                    Sprite = sprite,
-                    Color = color,
-                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                    Alpha = 1.0f
-                });
-                Entity temperatureTile = _world.CreateEntity();
-                temperatureTile.Set(new DrawInfoComponent {
-                    Sprite = TileTypeHelper.DetermineTemperatureTile(_temperatureMap[i]),
-                    Color = TileTypeHelper.DetermineTemperatureColor(_temperatureMap[i]),
-                    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                    Alpha = 1.0f
-                });
             }
-            Log.Logger.Information($"Max Temp: {_temperatureMap.Max()}");
-            Log.Logger.Information($"Min Temp: {_temperatureMap.Min()}");
-            Log.Logger.Information($"Avg Temp: {_temperatureMap.Average()}");
         }
 
 
@@ -112,6 +137,15 @@ namespace MGDFClone.Screens {
 
         public override void Update(GameTime gameTime) {
             _handleCameraMovement();
+            if(_inputManager.JustReleased(Keys.OemTilde)) {
+                _showTemp = !_showTemp;
+                if (_showTemp) {
+                    _clearTemperatureSprites();
+                } else {
+                    _addTemperateSprites();
+                }
+            }
+
         }
 
         public override void Draw(GameTime gameTime) {
