@@ -70,8 +70,12 @@ namespace MGDFClone.Features.MapGen {
                 Log.Logger.Error($"Humidity exceeded threshold: {value}");
             }
             switch (value) {
+                case < 5.0f:
+                    return Color.DarkRed;         //Desert
                 case < 10.0f:
                     return Color.SaddleBrown;      // Very Dry (Desert-like)
+                case < 15.0f:
+                    return Color.SandyBrown;       // Slightly dry
                 case < 20.0f:
                     return Color.Tan;              // Low Humidity
                 case < 30.0f:

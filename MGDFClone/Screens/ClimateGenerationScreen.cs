@@ -46,7 +46,7 @@ public class ClimateGenerationScreen : ScreenBase {
     private float[] _initialHumidityMap;
     private float[] _finalHumidityMap;
     private float _mountainThreshold = 0.8f;      // Elevation threshold for mountains
-    private float _percipitationFactor = 0.6f;    // How much moisture is deposited by mountains
+    private float _percipitationFactor = 0.9f;    // How much moisture is deposited by mountains
     private float _rainShadowEffect = 0.2f;       // Percentage of remaining moisture after crossing mountains
     private float _eastwardDissipation = 0.85f;   // Eastward dissipation of moisture
 
@@ -95,35 +95,57 @@ public class ClimateGenerationScreen : ScreenBase {
     }
 
     private void _calculateHumidity() {
+        // First pass: left to right (same as before)
         for (int y = 0; y < mapHeight; y++) {
-            // Start with an initial moisture level for the leftmost tile in the row
-            float moisture = _initialHumidityMap[y];
+            float moisture = _initialHumidityMap[y];  // Start with initial moisture on the left edge
 
             for (int x = 0; x < mapWidth; x++) {
                 int index = y * mapWidth + x;  // Calculate the index for the current tile
 
-                // Get the relevant map data for this tile
                 float temperature = _temperatureMap[index];
                 float moistureCapacity = _calculateMoistureCapacity(temperature);
                 float height = _heightMap[index];
 
-                // If the tile is water, add extra moisture to simulate evaporation
                 if (height < 0.30f) {
-                    moisture += 20.0f;  // Increase moisture for water tiles (adjust this value as needed)
+                    moisture += 20.0f;  // Add moisture for water tiles
                 }
 
-                // If the tile is a mountain, deposit moisture and reduce the remaining amount
                 if (height > _mountainThreshold) {
-                    _finalHumidityMap[index] = Math.Min(moisture * _percipitationFactor, moistureCapacity);  // Deposit some moisture
-                    moisture *= _rainShadowEffect;  // Remaining moisture is greatly reduced by rain shadow
+                    _finalHumidityMap[index] = Math.Min(moisture * _percipitationFactor, moistureCapacity);
+                    moisture *= _rainShadowEffect;  // Rain shadow effect reduces moisture
                 } else {
-                    // Non-mountain tiles absorb moisture up to their capacity
                     moisture = Math.Min(moisture, moistureCapacity);
                     _finalHumidityMap[index] = moisture;
                 }
 
-                // Apply dissipation as moisture moves eastward
-                moisture *= _eastwardDissipation;
+                moisture *= _eastwardDissipation;  // Apply dissipation as moisture moves eastward
+            }
+        }
+
+        // Second pass: right to left
+        for (int y = 0; y < mapHeight; y++) {
+            float moisture = _initialHumidityMap[y];  // Start with initial moisture on the right edge
+
+            for (int x = mapWidth - 1; x >= 0; x--) {
+                int index = y * mapWidth + x;  // Calculate the index for the current tile
+
+                float temperature = _temperatureMap[index];
+                float moistureCapacity = _calculateMoistureCapacity(temperature);
+                float height = _heightMap[index];
+
+                if (height < 0.30f) {
+                    moisture += 20.0f;  // Add moisture for water tiles
+                }
+
+                if (height > _mountainThreshold) {
+                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], Math.Min(moisture * _percipitationFactor, moistureCapacity));
+                    moisture *= _rainShadowEffect;  // Rain shadow effect reduces moisture
+                } else {
+                    moisture = Math.Min(moisture, moistureCapacity);
+                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], moisture);
+                }
+
+                moisture *= _eastwardDissipation;  // Apply dissipation as moisture moves westward
             }
         }
 
@@ -145,7 +167,7 @@ public class ClimateGenerationScreen : ScreenBase {
                     Sprite = eSprite.CapitalO,
                     Color = TileTypeHelper.DetermineHumidityColor(_finalHumidityMap[i] * 100.0f),
                     Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                    Alpha = 1.0f
+                    Alpha = 0.450f
                 });
                 humidityTiles.Add(humidity);
             }
@@ -169,7 +191,7 @@ public class ClimateGenerationScreen : ScreenBase {
                     Sprite = eSprite.CapitalQ,
                     Color = TileTypeHelper.DetermineHumidityColor(_initialHumidityMap[i] * 100.0f),
                     Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                    Alpha = 1.0f
+                    Alpha = 0.650f
                 });
                 _initHumidities.Add(humidity);
             }
