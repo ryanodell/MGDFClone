@@ -50,6 +50,8 @@ public class ClimateGenerationScreen : ScreenBase {
     private float _rainShadowEffect = 0.2f;       // Percentage of remaining moisture after crossing mountains
     private float _eastwardDissipation = 0.85f;   // Eastward dissipation of moisture
 
+    private float _baseMoisture = 0.25f;
+
     List<Entity> humidityTiles = new List<Entity>();
     private bool _showHumidityMap = false;
     private float _minimumHumidity = 0.0f;
@@ -182,7 +184,8 @@ public class ClimateGenerationScreen : ScreenBase {
     }
 
     private float _calculateMoistureCapacity(float temperature) {
-        return (float)Math.Exp(temperature / 10.0f) - 1.0f;  // Adjust parameters to suit your map's temperature scale
+        //return (float)Math.Exp(temperature / 10.0f) - 1.0f;  // Adjust parameters to suit your map's temperature scale
+        return (float)Math.Exp(temperature / 200.5f) - 1.0f + _baseMoisture;
     }   
 
     private void _addTemperateSprites() {

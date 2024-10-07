@@ -66,6 +66,9 @@ namespace MGDFClone.Features.MapGen {
             }
         }
         public static Color DetermineHumidityColor(float value) {
+            if(value > 100.0f) {
+                Log.Logger.Error($"Humidity exceeded threshold: {value}");
+            }
             switch (value) {
                 case < 10.0f:
                     return Color.SaddleBrown;      // Very Dry (Desert-like)
