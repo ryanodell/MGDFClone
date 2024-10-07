@@ -124,32 +124,32 @@ public class ClimateGenerationScreen : ScreenBase {
             }
         }
 
-        // 2. Right to left pass
-        for (int y = 0; y < mapHeight; y++) {
-            float moisture = _initialHumidityMap[y];  // Reset initial moisture for each row
+        // 2. Right to left pass - undecided if we do this or not
+        //for (int y = 0; y < mapHeight; y++) {
+        //    float moisture = _initialHumidityMap[y];  // Reset initial moisture for each row
 
-            for (int x = mapWidth - 1; x >= 0; x--) {
-                int index = y * mapWidth + x;  // Calculate the index for the current tile
+        //    for (int x = mapWidth - 1; x >= 0; x--) {
+        //        int index = y * mapWidth + x;  // Calculate the index for the current tile
 
-                float temperature = _temperatureMap[index];
-                float moistureCapacity = _calculateMoistureCapacity(temperature);
-                float height = _heightMap[index];
+        //        float temperature = _temperatureMap[index];
+        //        float moistureCapacity = _calculateMoistureCapacity(temperature);
+        //        float height = _heightMap[index];
 
-                if (height < 0.30f) {
-                    moisture += 20.0f;  // Increase moisture for water tiles
-                }
+        //        if (height < 0.30f) {
+        //            moisture += 20.0f;  // Increase moisture for water tiles
+        //        }
 
-                if (height > _mountainThreshold) {
-                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], Math.Min(moisture * _percipitationFactor, moistureCapacity));
-                    moisture *= _rainShadowEffect;
-                } else {
-                    moisture = Math.Min(moisture, moistureCapacity);
-                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], moisture);
-                }
+        //        if (height > _mountainThreshold) {
+        //            _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], Math.Min(moisture * _percipitationFactor, moistureCapacity));
+        //            moisture *= _rainShadowEffect;
+        //        } else {
+        //            moisture = Math.Min(moisture, moistureCapacity);
+        //            _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], moisture);
+        //        }
 
-                moisture *= _eastwardDissipation;
-            }
-        }
+        //        moisture *= _eastwardDissipation;
+        //    }
+        //}
 
         // 3. Top to bottom pass
         for (int x = 0; x < mapWidth; x++) {
