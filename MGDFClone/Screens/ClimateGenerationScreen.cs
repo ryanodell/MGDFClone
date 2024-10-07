@@ -95,9 +95,9 @@ public class ClimateGenerationScreen : ScreenBase {
     }
 
     private void _calculateHumidity() {
-        // First pass: left to right (same as before)
+        // 1. Left to right pass
         for (int y = 0; y < mapHeight; y++) {
-            float moisture = _initialHumidityMap[y];  // Start with initial moisture on the left edge
+            float moisture = _initialHumidityMap[y];  // Start with initial moisture level for each row
 
             for (int x = 0; x < mapWidth; x++) {
                 int index = y * mapWidth + x;  // Calculate the index for the current tile
@@ -106,25 +106,27 @@ public class ClimateGenerationScreen : ScreenBase {
                 float moistureCapacity = _calculateMoistureCapacity(temperature);
                 float height = _heightMap[index];
 
+                // If the tile is water, add extra moisture to simulate evaporation
                 if (height < 0.30f) {
-                    moisture += 20.0f;  // Add moisture for water tiles
+                    moisture += 20.0f;  // Increase moisture for water tiles (adjust this value as needed)
                 }
 
+                // Handle mountains
                 if (height > _mountainThreshold) {
                     _finalHumidityMap[index] = Math.Min(moisture * _percipitationFactor, moistureCapacity);
-                    moisture *= _rainShadowEffect;  // Rain shadow effect reduces moisture
+                    moisture *= _rainShadowEffect;  // Rain shadow effect
                 } else {
                     moisture = Math.Min(moisture, moistureCapacity);
                     _finalHumidityMap[index] = moisture;
                 }
 
-                moisture *= _eastwardDissipation;  // Apply dissipation as moisture moves eastward
+                moisture *= _eastwardDissipation;
             }
         }
 
-        // Second pass: right to left
+        // 2. Right to left pass
         for (int y = 0; y < mapHeight; y++) {
-            float moisture = _initialHumidityMap[y];  // Start with initial moisture on the right edge
+            float moisture = _initialHumidityMap[y];  // Reset initial moisture for each row
 
             for (int x = mapWidth - 1; x >= 0; x--) {
                 int index = y * mapWidth + x;  // Calculate the index for the current tile
@@ -134,18 +136,72 @@ public class ClimateGenerationScreen : ScreenBase {
                 float height = _heightMap[index];
 
                 if (height < 0.30f) {
-                    moisture += 20.0f;  // Add moisture for water tiles
+                    moisture += 20.0f;  // Increase moisture for water tiles
                 }
 
                 if (height > _mountainThreshold) {
                     _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], Math.Min(moisture * _percipitationFactor, moistureCapacity));
-                    moisture *= _rainShadowEffect;  // Rain shadow effect reduces moisture
+                    moisture *= _rainShadowEffect;
                 } else {
                     moisture = Math.Min(moisture, moistureCapacity);
                     _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], moisture);
                 }
 
-                moisture *= _eastwardDissipation;  // Apply dissipation as moisture moves westward
+                moisture *= _eastwardDissipation;
+            }
+        }
+
+        // 3. Top to bottom pass
+        for (int x = 0; x < mapWidth; x++) {
+            float moisture = _initialHumidityMap[x];  // Initial moisture for each column
+
+            for (int y = 0; y < mapHeight; y++) {
+                int index = y * mapWidth + x;  // Calculate the index for the current tile
+
+                float temperature = _temperatureMap[index];
+                float moistureCapacity = _calculateMoistureCapacity(temperature);
+                float height = _heightMap[index];
+
+                if (height < 0.30f) {
+                    moisture += 20.0f;  // Increase moisture for water tiles
+                }
+
+                if (height > _mountainThreshold) {
+                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], Math.Min(moisture * _percipitationFactor, moistureCapacity));
+                    moisture *= _rainShadowEffect;
+                } else {
+                    moisture = Math.Min(moisture, moistureCapacity);
+                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], moisture);
+                }
+
+                moisture *= _eastwardDissipation;  // Change this to a vertical dissipation factor if needed
+            }
+        }
+
+        // 4. Bottom to top pass
+        for (int x = 0; x < mapWidth; x++) {
+            float moisture = _initialHumidityMap[x];  // Initial moisture for each column
+
+            for (int y = mapHeight - 1; y >= 0; y--) {
+                int index = y * mapWidth + x;  // Calculate the index for the current tile
+
+                float temperature = _temperatureMap[index];
+                float moistureCapacity = _calculateMoistureCapacity(temperature);
+                float height = _heightMap[index];
+
+                if (height < 0.30f) {
+                    moisture += 20.0f;  // Increase moisture for water tiles
+                }
+
+                if (height > _mountainThreshold) {
+                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], Math.Min(moisture * _percipitationFactor, moistureCapacity));
+                    moisture *= _rainShadowEffect;
+                } else {
+                    moisture = Math.Min(moisture, moistureCapacity);
+                    _finalHumidityMap[index] = Math.Max(_finalHumidityMap[index], moisture);
+                }
+
+                moisture *= _eastwardDissipation;  // Consider using a vertical dissipation factor here
             }
         }
 
@@ -154,7 +210,6 @@ public class ClimateGenerationScreen : ScreenBase {
             _finalHumidityMap[i] = Math.Clamp(_finalHumidityMap[i], _minimumHumidity, _maximumHunidty);
         }
     }
-
 
     private void _addHumiditySprites() {
         if (_showHumidityMap) {
