@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Serilog;
-using System;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 
 namespace MGDFClone.Screens; 
@@ -46,10 +45,6 @@ public class ClimateGenerationScreen : ScreenBase {
     ///////////////////////////////////////////////////Atmosphere related/////////////////////////////////////////////
     private float[] _initialHumidityMap;
     private float[] _finalHumidityMap;
-    //private float _mountainThreshold = 0.85f;
-    //private float _percipitationFactor = 0.5f;
-    //private float _rainShadowEffect = 0.05f;
-    //private float _eastwardDissipation = 0.7f;
     private float _mountainThreshold = 0.8f;      // Elevation threshold for mountains
     private float _percipitationFactor = 0.6f;    // How much moisture is deposited by mountains
     private float _rainShadowEffect = 0.2f;       // Percentage of remaining moisture after crossing mountains
@@ -94,12 +89,7 @@ public class ClimateGenerationScreen : ScreenBase {
                 Alpha = 1.0f
             });
         }
-        _calculateTemperatures();
-        _addTemperateSprites();
-
-        _calculateHumidity();
-        _addHumiditySprites();
-        _logHumidityDetails();
+        _changeSeason(Season.Winter);
     }
 
     private void _calculateHumidity() {
@@ -191,43 +181,9 @@ public class ClimateGenerationScreen : ScreenBase {
         _initHumidities.Clear();
     }
 
-    //private float _calculateMoistureCapacity(float temperature) {
-    //    return Math.Max(0.0f, (temperature + 50.0f) * 0.5f);  // Adjust the base and scaling factor
-    //}
-
     private float _calculateMoistureCapacity(float temperature) {
         return (float)Math.Exp(temperature / 10.0f) - 1.0f;  // Adjust parameters to suit your map's temperature scale
-    }
-
-
-
-    //private float _calculateMoistureCapacity(float temperature) {
-    //    return temperature * 8.3f;
-    //}
-
-    private void _logHumidityDetails() {
-        Log.Logger.Information($"Season: {currentSeason.ToString()}");
-        Log.Logger.Information($"Max Humidity: {_finalHumidityMap.Max()}");
-        Log.Logger.Information($"Min Humidity: {_finalHumidityMap.Min()}");
-        Log.Logger.Information($"Avg Humidity: {_finalHumidityMap.Average()}");
-        Log.Logger.Information($"____________________________________");
-    }
-
-    private void _logTemperatureDetails() {
-        Log.Logger.Information($"Season: {currentSeason.ToString()}");
-        Log.Logger.Information($"Max Temp: {_temperatureMap.Max()}");
-        Log.Logger.Information($"Min Temp: {_temperatureMap.Min()}");
-        Log.Logger.Information($"Avg Temp: {_temperatureMap.Average()}");
-        Log.Logger.Information($"____________________________________");
-    }
-
-    private void _logInitHumidityDetails() {
-        Log.Logger.Information($"Season: {currentSeason.ToString()}");
-        Log.Logger.Information($"Max Init Humidity: {_initialHumidityMap.Max()}");
-        Log.Logger.Information($"Min Init Humidity: {_initialHumidityMap.Min()}");
-        Log.Logger.Information($"Avg Init Humidity: {_initialHumidityMap.Average()}");
-        Log.Logger.Information($"____________________________________");
-    }
+    }   
 
     private void _addTemperateSprites() {
         if (_showTemp) {
@@ -253,102 +209,6 @@ public class ClimateGenerationScreen : ScreenBase {
         }
         temperatureTiles.Clear();
     }
-
-    //private void _calculateTemperatures() {
-    //    float seasonalOffset = SeasonalTemperatureOffsets[currentSeason];
-
-    //    // Base temperature range and offsets
-    //    float baseMinTemp = 30.0f;   // Warmer minimum base temperature
-    //    float baseMaxTemp = 90.0f;   // Higher maximum temperature for a broader range
-
-    //    for (int i = 0; i < _heightMap.Length; i++) {
-    //        int row = i / mapWidth;
-    //        float elevation = _heightMap[i];
-
-    //        // Modify latitude factor to be less aggressive
-    //        float latitudeFactor = row / (float)(mapHeight - 1);
-    //        latitudeFactor = MathF.Pow(latitudeFactor, 0.7f);  // Less power reduces impact
-
-    //        // Calculate a more controlled distribution using a custom curve
-    //        latitudeFactor = 0.5f + 0.5f * (1.0f - MathF.Abs(latitudeFactor - 0.5f));
-
-    //        // Calculate the base temperature using the new min and max range
-    //        float baseTemperature = baseMaxTemp - latitudeFactor * (baseMaxTemp - baseMinTemp);
-
-    //        // Add a baseline to ensure even the coldest areas are warmer
-    //        baseTemperature += 15.0f;
-
-    //        // Apply seasonal offset to base temperature (positive for Spring/Summer, negative for Winter)
-    //        baseTemperature += seasonalOffset;
-
-    //        // Calculate temperature drop due to elevation but reduce its impact
-    //        float elevationInMeters = elevation * maxElevationInMeters;
-    //        float elevationCooling = (elevationInMeters / 1000.0f) * (lapseRateF / 2.0f); // Halve the impact of elevation cooling
-
-    //        // Final temperature after elevation adjustment
-    //        float adjustedTemperature = baseTemperature - elevationCooling;
-
-    //        // Ensure temperatures do not drop below the base minimum temperature
-    //        if (adjustedTemperature < baseMinTemp) {
-    //            adjustedTemperature = baseMinTemp;
-    //        }
-
-    //        // Blend with water temperature for areas below the water elevation
-    //        if (elevation < _waterElevation) {
-    //            float waterBlendFactor = elevation / _waterElevation;
-    //            adjustedTemperature = MathHelper.Lerp(_waterTemperature, adjustedTemperature, waterBlendFactor);
-    //        }
-
-    //        // Final clamping to avoid extreme values
-    //        _temperatureMap[i] = Math.Clamp(adjustedTemperature, baseMinTemp, baseMaxTemp);
-    //    }
-
-    //    // Log the temperature details for verification
-    //    _logTemperatureDetails();
-    //}
-
-
-    //private void _calculateTemperatures() {
-    //    float seasonalOffset = SeasonalTemperatureOffsets[currentSeason];
-    //    for (int i = 0; i < _heightMap.Length; i++) {
-    //        int row = i / mapWidth;
-    //        float elevation = _heightMap[i];
-
-    //        // Calculate latitude factor ranging from 0 (top) to 1 (bottom)
-    //        float latitudeFactor = row / (float)(mapHeight - 1);
-
-    //        // Create a "bell curve" for temperature using a cosine function
-    //        float tempGradient = MathF.Cos(latitudeFactor * MathF.PI);  // Range from 1 (equator) to -1 (poles)
-
-    //        // Calculate base temperature using the latitude factor
-    //        float baseTemperature = (_maxTemp + _minTemp) / 2.0f + tempGradient * ((_maxTemp - _minTemp) / 2.0f);
-
-    //        // Apply the seasonal offset
-    //        baseTemperature += seasonalOffset;
-
-    //        // Calculate the temperature drop due to elevation.
-    //        float elevationInMeters = elevation * maxElevationInMeters;
-    //        float elevationCooling = (elevationInMeters / 1000.0f) * lapseRateF;
-
-    //        // Calculate adjusted temperature by considering elevation, but clamp it to avoid going below _minTemp
-    //        float adjustedTemperature = baseTemperature - elevationCooling;
-    //        if (adjustedTemperature < _minTemp) {
-    //            adjustedTemperature = _minTemp;
-    //        }
-
-    //        // Water body cooling effect for tiles below water level
-    //        if (elevation < _waterElevation) {
-    //            float waterBlendFactor = elevation / _waterElevation;
-    //            adjustedTemperature = MathHelper.Lerp(_waterTemperature, adjustedTemperature, waterBlendFactor);
-    //        }
-
-    //        // Final clamping to ensure the temperature is between min and max
-    //        _temperatureMap[i] = Math.Clamp(adjustedTemperature, _minTemp, _maxTemp);
-    //    }
-
-    //    // Log the details for debugging
-    //    _logTemperatureDetails();
-    //}
 
     private void _calculateTemperatures() {
         float seasonalOffset = SeasonalTemperatureOffsets[currentSeason];
@@ -378,6 +238,18 @@ public class ClimateGenerationScreen : ScreenBase {
 
     public override void UnloadContent() { }
 
+    private void _changeSeason(Season season) {
+        if(currentSeason == season) return;
+        currentSeason = season;
+        _clearTemperatureSprites();
+        _calculateTemperatures();
+        _addTemperateSprites();
+
+        _clearHumiditySprites();
+        _calculateHumidity();
+        _addHumiditySprites();
+    }
+
     public override void Update(GameTime gameTime) {
         _handleCameraMovement();
         if (_inputManager.JustReleased(Keys.Z)) {
@@ -405,28 +277,16 @@ public class ClimateGenerationScreen : ScreenBase {
             }
         }
         if (_inputManager.JustReleased(Keys.D1)) {
-            _clearTemperatureSprites();
-            currentSeason = Season.Winter;
-            _calculateTemperatures();
-            _addTemperateSprites();
+            _changeSeason(Season.Winter);
         }
         if (_inputManager.JustReleased(Keys.D2)) {
-            _clearTemperatureSprites();
-            currentSeason = Season.Spring;
-            _calculateTemperatures();
-            _addTemperateSprites();
+            _changeSeason(Season.Spring);
         }
         if (_inputManager.JustReleased(Keys.D3)) {
-            _clearTemperatureSprites();
-            currentSeason = Season.Summer;
-            _calculateTemperatures();
-            _addTemperateSprites();
+            _changeSeason(Season.Summer);
         }
         if (_inputManager.JustReleased(Keys.D4)) {
-            _clearTemperatureSprites();
-            currentSeason = Season.Autumn;
-            _calculateTemperatures();
-            _addTemperateSprites();
+            _changeSeason(Season.Autumn);
         }
     }
 
@@ -459,6 +319,31 @@ public class ClimateGenerationScreen : ScreenBase {
             _camSpeed = 8.0f;
         }
     }
+
+    private void _logHumidityDetails() {
+        Log.Logger.Information($"Season: {currentSeason.ToString()}");
+        Log.Logger.Information($"Max Humidity: {_finalHumidityMap.Max()}");
+        Log.Logger.Information($"Min Humidity: {_finalHumidityMap.Min()}");
+        Log.Logger.Information($"Avg Humidity: {_finalHumidityMap.Average()}");
+        Log.Logger.Information($"____________________________________");
+    }
+
+    private void _logTemperatureDetails() {
+        Log.Logger.Information($"Season: {currentSeason.ToString()}");
+        Log.Logger.Information($"Max Temp: {_temperatureMap.Max()}");
+        Log.Logger.Information($"Min Temp: {_temperatureMap.Min()}");
+        Log.Logger.Information($"Avg Temp: {_temperatureMap.Average()}");
+        Log.Logger.Information($"____________________________________");
+    }
+
+    private void _logInitHumidityDetails() {
+        Log.Logger.Information($"Season: {currentSeason.ToString()}");
+        Log.Logger.Information($"Max Init Humidity: {_initialHumidityMap.Max()}");
+        Log.Logger.Information($"Min Init Humidity: {_initialHumidityMap.Min()}");
+        Log.Logger.Information($"Avg Init Humidity: {_initialHumidityMap.Average()}");
+        Log.Logger.Information($"____________________________________");
+    }
+
 }
 // Seasonal temperature adjustments in °F.
 public enum Season {
