@@ -4,16 +4,13 @@
 namespace MGDFClone.Features.MapGen {
     public class MapGeneratorV3
     {
-        public const int REGION_TILE_COUNT = 16;
-        public const int LOCAL_TILE_COUNT = 48;
-        private int m_width;
-        private int m_height;
+        public static readonly int REGION_TILE_COUNT = 16;
+        public static readonly int LOCAL_TILE_COUNT = 48;
         private WorldMap m_worldMap;
+        public WorldMap WorldMap {  get { return m_worldMap; } }
 
-        public MapGeneratorV3(int  width, int height) {
-            m_width = width;
-            m_height = height;            
-
+        public MapGeneratorV3(eWorldSize worldSize) {
+            m_worldMap = new WorldMap(worldSize);
         }
 
     }
