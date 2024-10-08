@@ -1,5 +1,6 @@
 ﻿using DefaultEcs;
 using MGDFClone.Core;
+using MGDFClone.Features.WorldGen;
 using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,16 +12,18 @@ namespace MGDFClone.Screens {
         private World _world;
         private Camera2D _camera;
         private readonly RenderSystem _renderSystem;
+        WorldGeneratorV1 _worldGenerator;
         public WorldGenerationScreenV1(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
             _camera.Zoom = 3.5f;
             _camera.LookAt(Vector2.Zero);
             _renderSystem = new RenderSystem(_world, _spriteBatch, _camera);
+            _worldGenerator = new WorldGeneratorV1(eWorldSize.Small);
         }       
 
         public override void LoadContent() {
-
+            _worldGenerator.GenerateWorld();
         }
 
         public override void UnloadContent() {
