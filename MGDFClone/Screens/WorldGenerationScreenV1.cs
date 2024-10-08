@@ -19,7 +19,7 @@ namespace MGDFClone.Screens {
             _camera.Zoom = 3.5f;
             _camera.LookAt(Vector2.Zero);
             _renderSystem = new RenderSystem(_world, _spriteBatch, _camera);
-            _worldGenerator = new WorldGeneratorV1(eWorldSize.Small);
+            _worldGenerator = new WorldGeneratorV1(eWorldSize.Small, eSeason.Winter);
         }       
 
         public override void LoadContent() {

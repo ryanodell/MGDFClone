@@ -3,6 +3,7 @@ using MGDFClone.Components;
 using MGDFClone.Core;
 using MGDFClone.Features.MapGen;
 using MGDFClone.Features.PerlinNoise;
+using MGDFClone.Features.WorldGen;
 using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,12 +32,12 @@ public class ClimateGenerationScreen : ScreenBase {
     float maxElevationInMeters = 7000.0f;
     // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F | 1000 meters (standard value).
     float lapseRateF = 11.7f;
-    Season currentSeason = Season.Summer;
-    Dictionary<Season, float> SeasonalTemperatureOffsets = new Dictionary<Season, float>() {
-        { Season.Winter, -20.0f },   // Winter is 20°F colder.
-        { Season.Spring, 5.0f },     // Spring is 5°F warmer.
-        { Season.Summer, 20.0f },    // Summer is 20°F warmer.
-        { Season.Autumn, 0.0f }      // Autumn has no change.
+    eSeason currentSeason = eSeason.Summer;
+    Dictionary<eSeason, float> SeasonalTemperatureOffsets = new Dictionary<eSeason, float>() {
+        { eSeason.Winter, -20.0f },   // Winter is 20°F colder.
+        { eSeason.Spring, 5.0f },     // Spring is 5°F warmer.
+        { eSeason.Summer, 20.0f },    // Summer is 20°F warmer.
+        { eSeason.Autumn, 0.0f }      // Autumn has no change.
     };
     List<Entity> temperatureTiles = new List<Entity>();
     private bool _showTemp = false;
@@ -91,7 +92,7 @@ public class ClimateGenerationScreen : ScreenBase {
                 Alpha = 1.0f
             });
         }
-        _changeSeason(Season.Winter);
+        _changeSeason(eSeason.Winter);
     }
 
     private void _calculateHumidity() {
@@ -318,7 +319,7 @@ public class ClimateGenerationScreen : ScreenBase {
 
     public override void UnloadContent() { }
 
-    private void _changeSeason(Season season) {
+    private void _changeSeason(eSeason season) {
         if(currentSeason == season) return;
         currentSeason = season;
         _clearTemperatureSprites();
@@ -357,16 +358,16 @@ public class ClimateGenerationScreen : ScreenBase {
             }
         }
         if (_inputManager.JustReleased(Keys.D1)) {
-            _changeSeason(Season.Winter);
+            _changeSeason(eSeason.Winter);
         }
         if (_inputManager.JustReleased(Keys.D2)) {
-            _changeSeason(Season.Spring);
+            _changeSeason(eSeason.Spring);
         }
         if (_inputManager.JustReleased(Keys.D3)) {
-            _changeSeason(Season.Summer);
+            _changeSeason(eSeason.Summer);
         }
         if (_inputManager.JustReleased(Keys.D4)) {
-            _changeSeason(Season.Autumn);
+            _changeSeason(eSeason.Autumn);
         }
     }
 
@@ -426,9 +427,3 @@ public class ClimateGenerationScreen : ScreenBase {
 
 }
 // Seasonal temperature adjustments in °F.
-public enum Season {
-    Winter,
-    Spring,
-    Summer,
-    Autumn
-}
