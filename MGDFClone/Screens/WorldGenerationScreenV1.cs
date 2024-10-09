@@ -1,5 +1,7 @@
 ﻿using DefaultEcs;
+using MGDFClone.Components;
 using MGDFClone.Core;
+using MGDFClone.Features.MapGen;
 using MGDFClone.Features.WorldGen;
 using MGDFClone.System;
 using Microsoft.Xna.Framework;
@@ -23,7 +25,25 @@ namespace MGDFClone.Screens {
         }       
 
         public override void LoadContent() {
-            _worldGenerator.GenerateWorld();
+            if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
+                _worldGenerator.GenerateWorld();
+                var data = _worldGenerator.WorldMap;
+                for (int i = 0; i < data.RegionTiles.Length; i++) {
+                    int row = i / data.Width;
+                    int column = i % data.Width;
+                    Entity tile = _world.CreateEntity();
+                    eSprite sprite = eSprite.None;
+                    Color color = Color.White;
+                    var tileType = TileTypeHelper.DetermineBaseTerrain(data.RegionTiles[i].Elevation);
+                    TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
+                    tile.Set(new DrawInfoComponent {
+                        Sprite = sprite,
+                        Color = color,
+                        Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                        Alpha = 1.0f
+                    });
+                }
+            }
         }
 
         public override void UnloadContent() {

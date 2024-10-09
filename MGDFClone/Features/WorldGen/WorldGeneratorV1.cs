@@ -126,6 +126,7 @@ public class LocalTile1 {
 public class RegionTile1 {
     public float Elevation;
     public float Temperature;
+    public float Moisture;
 }
 public enum eSeason {
     Winter,
