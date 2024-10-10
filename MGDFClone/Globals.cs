@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using MGDFClone.Features.WorldGen;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace MGDFClone; 
 public static class Globals {

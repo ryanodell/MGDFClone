@@ -1,20 +1,23 @@
 ﻿using MGDFClone.Features.PerlinNoise;
+using MGDFClone.Models;
 using Microsoft.Xna.Framework;
 namespace MGDFClone.Features.WorldGen; 
 public class WorldGeneratorV1 {
     public static readonly int REGION_TILE_COUNT = 16;
     public static readonly int LOCAL_TILE_COUNT = 48;
-    private float m_minimumTemperature = -20.0f;
-    private float m_maximumTemperature = 120.0f;
-    private float m_waterCoolingFactor = 10.0f;
-    private float m_waterTemperature = 50.0f;
+    private WorldGenerationParameters m_WorlGenerationParameters;
+    //private WorldTemperatureParameters m_WorlTemperatureParameters;
+    //private float m_minimumTemperature = -20.0f;
+    //private float m_maximumTemperature = 120.0f;
+    //private float m_waterCoolingFactor = 10.0f;
+    //private float m_waterTemperature = 50.0f;
     //Offset to avoid overly hot beaches
-    private float m_waterElevation = 0.60f;
-    // Maximum elevation in meters
-    private float m_maxElevationInMeters = 7000.0f;
+    //private float m_waterElevation = 0.60f;
+    //// Maximum elevation in meters
+    //private float m_maxElevationInMeters = 7000.0f;
     // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F | 1000 meters (standard value).
-    private float m_lapseRateF = 11.7f;
-    private eSeason m_season = eSeason.Winter;
+    //private float m_lapseRateF = 11.7f;
+    //private eSeason m_season = eSeason.Winter;
     public WorldMap1? WorldMap { get; private set; }
     Dictionary<eSeason, float> SeasonalTemperatureOffsets = new Dictionary<eSeason, float>() {
         { eSeason.Winter, -20.0f },
@@ -23,9 +26,13 @@ public class WorldGeneratorV1 {
         { eSeason.Autumn, 0.0f }   
     };
 
+    public WorldGeneratorV1(WorldGenerationParameters worldGenerationParameters) {
+        m_WorlGenerationParameters = worldGenerationParameters;
+        WorldMap = new WorldMap1(m_WorlGenerationParameters.WorldSize);
+    }
+
     public WorldGeneratorV1(eWorldSize worldSize, eSeason season) {
         WorldMap = new WorldMap1(worldSize);
-        m_season = season;
     }
 
     public void ChangeSeason(eSeason season) {
@@ -34,10 +41,11 @@ public class WorldGeneratorV1 {
 
     public void GenerateWorld() {
         if (WorldMap != null) {
-            float[] elevationMap = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, 4);
+            float[] elevationMap = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, 3);
             WorldMap.SetElevation(elevationMap);
-            WorldMap.GenerateTemperature(m_minimumTemperature, m_maximumTemperature, m_maxElevationInMeters,
-                m_waterElevation, m_waterCoolingFactor);
+            WorldMap.GenerateTemperature(m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature, 
+                    m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature, m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters,
+                m_WorlGenerationParameters.ElevationParameters.WaterElevation, m_WorlGenerationParameters.WorldTemperatureParameters.WaterCoolingFactor);
             _applyTemperature();
         }
     }
@@ -45,7 +53,7 @@ public class WorldGeneratorV1 {
     private void _applyTemperature() {
         if (WorldMap != null) {
             float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
-            float seasonalOffset = SeasonalTemperatureOffsets[m_season];
+            float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
             for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
                 int row = i / WorldMap.Width;
                 int col = i % WorldMap.Width;
@@ -53,16 +61,16 @@ public class WorldGeneratorV1 {
                 float latitudeFactor = row / (float)(WorldMap.Height - 1);
                 latitudeFactor = latitudeFactor * latitudeFactor;
                 latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
-                float baseTemperature = m_maximumTemperature - latitudeFactor * (m_maximumTemperature - m_minimumTemperature);
+                float baseTemperature = m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - latitudeFactor * (m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature);
                 // Calculate the temperature drop due to elevation.
-                float elevationInMeters = elevation * m_maxElevationInMeters;
+                float elevationInMeters = elevation * m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters;
                 // Calculate the cooling effect based on the elevation.
-                float elevationCooling = (elevationInMeters / 1000.0f) * m_lapseRateF;
+                float elevationCooling = (elevationInMeters / 1000.0f) * m_WorlGenerationParameters.WorldTemperatureParameters.LapseRate;
                 //float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
                 float adjustedTemperature = baseTemperature - elevationCooling;
-                if (elevation < m_waterElevation) {
-                    float waterBlendFactor = (elevation / m_waterElevation);
-                    adjustedTemperature = MathHelper.Lerp(m_waterTemperature, adjustedTemperature, waterBlendFactor);
+                if (elevation < m_WorlGenerationParameters.ElevationParameters.WaterElevation) {
+                    float waterBlendFactor = (elevation / m_WorlGenerationParameters.ElevationParameters.WaterElevation);
+                    adjustedTemperature = MathHelper.Lerp(m_WorlGenerationParameters.WorldTemperatureParameters.WaterTemperature, adjustedTemperature, waterBlendFactor);
                 }
                 adjustedTemperature += seasonalOffset;
                 temperatureMap[i] = adjustedTemperature;
