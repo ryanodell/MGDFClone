@@ -3,6 +3,7 @@ using MGDFClone.Managers;
 using MGDFClone.Screens;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.ImGuiNet;
 
 namespace MGDFClone;
 public class MainGame : Game {
@@ -12,6 +13,7 @@ public class MainGame : Game {
     public GraphicsDeviceManager GraphicsDeviceManager { get { return _graphics; } }
     public SpriteBatch SpriteBatch { get { return _spriteBatch; } }
     public InputManager InputManager { get { return _inputManager; } }
+    public static ImGuiRenderer ImGui;
     public MainGame() {
         _graphics = new GraphicsDeviceManager(this);
         _graphics.PreferMultiSampling = true;
@@ -28,7 +30,8 @@ public class MainGame : Game {
     protected override void Initialize() {
         ScreenManager.Instance.Init(this);
         base.Initialize();
-            
+        ImGui = new ImGuiRenderer(this);
+        ImGui.RebuildFontAtlas();
     }
 
     protected override void LoadContent() {

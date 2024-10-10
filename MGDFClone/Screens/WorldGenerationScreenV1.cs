@@ -9,7 +9,10 @@ using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using MonoGame.ImGuiNet;
+using Vec2 = System.Numerics.Vector2;
+using Vec3 = System.Numerics.Vector3;
+using Vec4 = System.Numerics.Vector4;
 
 namespace MGDFClone.Screens {
     public class WorldGenerationScreenV1 : ScreenBase {
@@ -17,6 +20,7 @@ namespace MGDFClone.Screens {
         private World _world;
         private Camera2D _camera;
         WorldGeneratorV1 _worldGenerator;
+        private ImGuiRenderer m_ImGui = MainGame.ImGui;
         public WorldGenerationScreenV1(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -75,6 +79,9 @@ namespace MGDFClone.Screens {
                 }
             }
             _spriteBatch.End();
+            MainGame.ImGui.BeginLayout(gameTime);
+
+            MainGame.ImGui.EndLayout();
         }
         private void _handleCameraMovement() {
             if (_inputManager.IsHeld(Keys.D)) {

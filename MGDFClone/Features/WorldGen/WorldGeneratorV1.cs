@@ -2,6 +2,7 @@
 using MGDFClone.Models;
 using Microsoft.Xna.Framework;
 namespace MGDFClone.Features.WorldGen; 
+
 public class WorldGeneratorV1 {
     public static readonly int REGION_TILE_COUNT = 16;
     public static readonly int LOCAL_TILE_COUNT = 48;
@@ -61,7 +62,8 @@ public class WorldGeneratorV1 {
                 float latitudeFactor = row / (float)(WorldMap.Height - 1);
                 latitudeFactor = latitudeFactor * latitudeFactor;
                 latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
-                float baseTemperature = m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - latitudeFactor * (m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature);
+                float baseTemperature = m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - 
+                    latitudeFactor * (m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature);
                 // Calculate the temperature drop due to elevation.
                 float elevationInMeters = elevation * m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters;
                 // Calculate the cooling effect based on the elevation.

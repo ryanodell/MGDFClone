@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DefaultEcs\DefaultEcs.csproj" />
     <ProjectReference Include="..\MGDFClone.Core\MGDFClone.Core.csproj" />
+    <ProjectReference Include="..\MonoGame.ImGuiNet\Monogame.ImGuiNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
