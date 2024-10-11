@@ -1,4 +1,5 @@
-﻿using MGDFClone.Features.PerlinNoise;
+﻿using MGDFClone.Features.MapGen;
+using MGDFClone.Features.PerlinNoise;
 using MGDFClone.Models;
 using Microsoft.Xna.Framework;
 namespace MGDFClone.Features.WorldGen; 
@@ -58,6 +59,23 @@ public class WorldGeneratorV1 {
             GenerateElevation();
             ApplyTemperature();
         }
+    }
+
+    public eTileMapType DetermineTerrainTile(float value) {
+        if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation - 0.10f)
+            return eTileMapType.DeepWater; // Low elevation = Water
+        if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation)
+            return eTileMapType.Water; // Low elevation = Water
+        else if (value < 0.35f)
+            return eTileMapType.Sand; // Slightly higher = Sand (beach)
+        else if (value < 0.70f)
+            return eTileMapType.Grass; // Middle = Grasslands
+        else if (value < 0.85f)
+            return eTileMapType.Hill; // Middle = Grasslands
+        else if (value < 0.90f)
+            return eTileMapType.Mountain; // Higher = Mountain
+        else
+            return eTileMapType.Snow; // Highest = Snow
     }
 
     public void ApplyTemperature() {

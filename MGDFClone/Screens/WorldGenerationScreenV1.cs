@@ -74,7 +74,8 @@ namespace MGDFClone.Screens {
                     Entity tile = _world.CreateEntity();
                     eSprite sprite = eSprite.None;
                     Color color = Color.White;
-                    var tileType = TileTypeHelper.DetermineBaseTerrain(data.RegionTiles[i].Elevation);
+                    //var tileType = TileTypeHelper.DetermineBaseTerrain(data.RegionTiles[i].Elevation);
+                    var tileType = _worldGenerator.DetermineTerrainTile(data.RegionTiles[i].Elevation);
                     TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
                     _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                 };
@@ -94,8 +95,7 @@ namespace MGDFClone.Screens {
             elevationParameters.WaterElevation = imgui_WaterElevation;
             elevationParameters.MaxElevationInMeters = imgui_MaxElevationInMeters;
             elevationParameters.PerlinOctaves = imgui_ElevationOctaves;
-            if(ImGui.Button("Test")) {
-                //Console.WriteLine("Clicked");
+            if(ImGui.Button("Generate World")) {
                 _worldGenerator.GenerateWorld();
             }
             ImGui.End();
