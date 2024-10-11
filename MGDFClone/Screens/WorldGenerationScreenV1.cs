@@ -78,6 +78,7 @@ namespace MGDFClone.Screens {
             float imgui_waterCoolingFactor = worldTemperatureParameters.WaterCoolingFactor;
             float imgui_waterTemperature = worldTemperatureParameters.WaterTemperature;
             float imgui_lapseRate = worldTemperatureParameters.LapseRate;
+            eSeason imgui_season = worldTemperatureParameters.Season;
             #endregion
 
             ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags.None;
@@ -94,6 +95,27 @@ namespace MGDFClone.Screens {
                     ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
                     ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
                     ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
+                    string label = worldTemperatureParameters.Season.ToString();
+                    string[] comboOptions = Enum.GetNames(typeof(eSeason));
+                    int selectedIndex = 0;
+                    for (int i = 0; i < comboOptions.Length; i++) {
+                        if (comboOptions[i] == label) {
+                            selectedIndex = i;
+                        }
+                    }
+                    if(ImGui.BeginCombo("Season", label, ImGuiComboFlags.None)) {
+                        for (int i = 0; i < comboOptions.Length; i++) {
+                            bool isSelected = (selectedIndex == i);
+                            if (ImGui.Selectable(comboOptions[i], isSelected)) {
+                                imgui_season = (eSeason)Enum.Parse(typeof(eSeason), comboOptions[i]);
+                            }
+                            if (isSelected) {
+                                ImGui.SetItemDefaultFocus();
+                            }
+                        }
+                        ImGui.EndCombo();
+                    }
+
                     ImGui.EndTabItem();
                 }
             }
@@ -108,6 +130,7 @@ namespace MGDFClone.Screens {
             worldTemperatureParameters.WaterCoolingFactor = imgui_waterCoolingFactor;
             worldTemperatureParameters.WaterTemperature = imgui_waterTemperature;
             worldTemperatureParameters.LapseRate = imgui_lapseRate;
+            worldTemperatureParameters.Season = imgui_season;
             #endregion
 
             if (ImGui.Button("Re-Generate World")) {
@@ -142,10 +165,10 @@ namespace MGDFClone.Screens {
             if (_inputManager.IsHeld(Keys.NumPad3)) {
                 _camera.Position = new Vector2(_camera.Position.X + _camSpeed, _camera.Position.Y + _camSpeed);
             }
-            if (_inputManager.JustPressed(Keys.OemMinus) || _inputManager.JustPressed(Keys.Subtract)) {
+            if (_inputManager.JustPressed(Keys.OemMinus) || _inputManager.JustPressed(Keys.Subtract) || _inputManager.GetMouseScroll() < 0) {
                 _camera.Zoom -= 0.3f;
             }
-            if (_inputManager.JustPressed(Keys.OemPlus) || _inputManager.JustPressed(Keys.Add)) {
+            if (_inputManager.JustPressed(Keys.OemPlus) || _inputManager.JustPressed(Keys.Add) || _inputManager.GetMouseScroll() > 0) {
                 _camera.Zoom += 0.3f;
             }
             if (_inputManager.IsHeld(Keys.Space)) {
