@@ -78,6 +78,11 @@ public class WorldGeneratorV1 {
             return eTileMapType.Snow; // Highest = Snow
     }
 
+    public eSprite GetSpriteForTerrainHeight(float value) {
+        eSprite sprite = eSprite.None;
+        return sprite;
+    }
+
     [Obsolete]
     public eTileMapType DetermineBaseTerrain(float value) {
 

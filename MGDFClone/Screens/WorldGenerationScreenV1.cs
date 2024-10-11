@@ -6,7 +6,6 @@ using MGDFClone.Features.MapGen;
 using MGDFClone.Features.WorldGen;
 using MGDFClone.Managers;
 using MGDFClone.Models;
-using MGDFClone.System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -38,22 +37,6 @@ namespace MGDFClone.Screens {
         public override void LoadContent() {
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
                 _worldGenerator.GenerateWorld();
-                //var data = _worldGenerator.WorldMap;
-                //for (int i = 0; i < data.RegionTiles.Length; i++) {
-                //    int row = i / data.Width;
-                //    int column = i % data.Width;
-                //    Entity tile = _world.CreateEntity();
-                //    eSprite sprite = eSprite.None;
-                //    Color color = Color.White;
-                //    var tileType = TileTypeHelper.DetermineBaseTerrain(data.RegionTiles[i].Elevation);
-                //    TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
-                //    tile.Set(new DrawInfoComponent {
-                //        Sprite = sprite,
-                //        Color = color,
-                //        Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                //        Alpha = 1.0f
-                //    });
-                //}
             }
         }
 
@@ -104,22 +87,34 @@ namespace MGDFClone.Screens {
             MainGame.ImGui.EndLayout();
         }
         private void _handleCameraMovement() {
-            if (_inputManager.IsHeld(Keys.D)) {
+            if (_inputManager.IsHeld(Keys.D) || _inputManager.IsHeld(Keys.NumPad6)) {
                 _camera.Position = new Vector2(_camera.Position.X + _camSpeed, _camera.Position.Y);
             }
-            if (_inputManager.IsHeld(Keys.A)) {
+            if (_inputManager.IsHeld(Keys.A) || _inputManager.IsHeld(Keys.NumPad4)) {
                 _camera.Position = new Vector2(_camera.Position.X - _camSpeed, _camera.Position.Y);
             }
-            if (_inputManager.IsHeld(Keys.W)) {
+            if (_inputManager.IsHeld(Keys.NumPad7)) {
+                _camera.Position = new Vector2(_camera.Position.X - _camSpeed, _camera.Position.Y - _camSpeed);
+            }
+            if (_inputManager.IsHeld(Keys.NumPad9)) {
+                _camera.Position = new Vector2(_camera.Position.X + _camSpeed, _camera.Position.Y - _camSpeed);
+            }
+            if (_inputManager.IsHeld(Keys.W) || _inputManager.IsHeld(Keys.NumPad8)) {
                 _camera.Position = new Vector2(_camera.Position.X, _camera.Position.Y - _camSpeed);
             }
-            if (_inputManager.IsHeld(Keys.S)) {
+            if (_inputManager.IsHeld(Keys.S) || _inputManager.IsHeld(Keys.NumPad2)) {
                 _camera.Position = new Vector2(_camera.Position.X, _camera.Position.Y + _camSpeed);
             }
-            if (_inputManager.JustPressed(Keys.OemMinus)) {
+            if (_inputManager.IsHeld(Keys.NumPad1)) {
+                _camera.Position = new Vector2(_camera.Position.X - _camSpeed, _camera.Position.Y + _camSpeed);
+            }
+            if (_inputManager.IsHeld(Keys.NumPad3)) {
+                _camera.Position = new Vector2(_camera.Position.X + _camSpeed, _camera.Position.Y + _camSpeed);
+            }
+            if (_inputManager.JustPressed(Keys.OemMinus) || _inputManager.JustPressed(Keys.Subtract)) {
                 _camera.Zoom -= 0.3f;
             }
-            if (_inputManager.JustPressed(Keys.OemPlus)) {
+            if (_inputManager.JustPressed(Keys.OemPlus) || _inputManager.JustPressed(Keys.Add)) {
                 _camera.Zoom += 0.3f;
             }
             if (_inputManager.IsHeld(Keys.Space)) {
