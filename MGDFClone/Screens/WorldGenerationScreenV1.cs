@@ -32,7 +32,7 @@ namespace MGDFClone.Screens {
             });
 
             //_worldGenerator = new WorldGeneratorV1(eWorldSize.Small, eSeason.Winter);
-        }       
+        }
 
         public override void LoadContent() {
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
@@ -48,7 +48,7 @@ namespace MGDFClone.Screens {
             _handleCameraMovement();
         }
         public override void Draw(GameTime gameTime) {
-            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, _camera.GetViewMatrix());            
+            _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, _camera.GetViewMatrix());
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
                 var data = _worldGenerator.WorldMap;
                 for (int i = 0; i < data.RegionTiles.Length; i++) {
@@ -65,25 +65,56 @@ namespace MGDFClone.Screens {
             }
             _spriteBatch.End();
             MainGame.ImGui.BeginLayout(gameTime);
-            ImGui.Begin("Elevation Parameters");
+            ImGui.Begin("World Generation Parameters");
             ElevationParameters elevationParameters = _worldGenerator.WorldGenerationParameters.ElevationParameters;
+            WorldTemperatureParameters worldTemperatureParameters = _worldGenerator.WorldGenerationParameters.WorldTemperatureParameters;
             #region BackingFields
             float imgui_WaterElevation = elevationParameters.WaterElevation;
             float imgui_MaxElevationInMeters = elevationParameters.MaxElevationInMeters;
             int imgui_ElevationOctaves = elevationParameters.PerlinOctaves;
+
+            float imgui_minimumTemperature = worldTemperatureParameters.MinimumTemperature;
+            float imgui_maximumTemperature = worldTemperatureParameters.MaximumTemperature;
+            float imgui_waterCoolingFactor = worldTemperatureParameters.WaterCoolingFactor;
+            float imgui_waterTemperature = worldTemperatureParameters.WaterTemperature;
+            float imgui_lapseRate = worldTemperatureParameters.LapseRate;
             #endregion
-            ImGui.InputInt("Octaves", ref imgui_ElevationOctaves);
-            ImGui.SliderFloat("Water Elevation", ref imgui_WaterElevation, 0.0f, 1.0f);
-            //ImGui.InputFloat("Water Elevation",ref imgui_WaterElevation);
-            ImGui.InputFloat("Max Elevation", ref imgui_MaxElevationInMeters);
+
+            ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags.None;
+            if (ImGui.BeginTabBar("tabBar", tab_bar_flags)) {
+                if (ImGui.BeginTabItem("Elevation")) {
+                    ImGui.InputInt("Octaves", ref imgui_ElevationOctaves);
+                    ImGui.SliderFloat("Water Elevation", ref imgui_WaterElevation, 0.0f, 1.0f);
+                    ImGui.InputFloat("Max Elevation", ref imgui_MaxElevationInMeters);
+                    ImGui.EndTabItem();
+                }
+                if (ImGui.BeginTabItem("World Temperature")) {
+                    ImGui.InputFloat("Min Temp", ref imgui_minimumTemperature);
+                    ImGui.InputFloat("Max Temp", ref imgui_maximumTemperature);
+                    ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
+                    ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
+                    ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
+                    ImGui.EndTabItem();
+                }
+            }
+            ImGui.EndTabBar();
+            #region BackingFields
             elevationParameters.WaterElevation = imgui_WaterElevation;
             elevationParameters.MaxElevationInMeters = imgui_MaxElevationInMeters;
             elevationParameters.PerlinOctaves = imgui_ElevationOctaves;
-            if(ImGui.Button("Re-Generate World")) {
+
+            worldTemperatureParameters.MinimumTemperature = imgui_minimumTemperature;
+            worldTemperatureParameters.MaximumTemperature = imgui_maximumTemperature;
+            worldTemperatureParameters.WaterCoolingFactor = imgui_waterCoolingFactor;
+            worldTemperatureParameters.WaterTemperature = imgui_waterTemperature;
+            worldTemperatureParameters.LapseRate = imgui_lapseRate;
+            #endregion
+
+            if (ImGui.Button("Re-Generate World")) {
                 _worldGenerator.GenerateWorld();
             }
             ImGui.End();
-            
+
             MainGame.ImGui.EndLayout();
         }
         private void _handleCameraMovement() {
