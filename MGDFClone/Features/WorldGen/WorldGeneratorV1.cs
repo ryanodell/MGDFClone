@@ -7,6 +7,7 @@ public class WorldGeneratorV1 {
     public static readonly int REGION_TILE_COUNT = 16;
     public static readonly int LOCAL_TILE_COUNT = 48;
     private WorldGenerationParameters m_WorlGenerationParameters;
+    public WorldGenerationParameters WorldGenerationParameters => m_WorlGenerationParameters;
     //private WorldTemperatureParameters m_WorlTemperatureParameters;
     //private float m_minimumTemperature = -20.0f;
     //private float m_maximumTemperature = 120.0f;
@@ -19,7 +20,7 @@ public class WorldGeneratorV1 {
     // Convert lapse rate to Fahrenheit if using Fahrenheit scale: 6.5°C ≈ 11.7°F | 1000 meters (standard value).
     //private float m_lapseRateF = 11.7f;
     //private eSeason m_season = eSeason.Winter;
-    public WorldMap1? WorldMap { get; private set; }
+    public WorldMap1 WorldMap { get; private set; }
     Dictionary<eSeason, float> SeasonalTemperatureOffsets = new Dictionary<eSeason, float>() {
         { eSeason.Winter, -20.0f },
         { eSeason.Spring, 5.0f },  
@@ -40,18 +41,26 @@ public class WorldGeneratorV1 {
 
     }
 
+    public void GenerateElevation() {
+        float[] elevationMap = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, m_WorlGenerationParameters.ElevationParameters.PerlinOctaves);
+        WorldMap.SetElevation(elevationMap);
+        WorldMap.GenerateTemperature(m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature,
+                m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature, m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters,
+            m_WorlGenerationParameters.ElevationParameters.WaterElevation, m_WorlGenerationParameters.WorldTemperatureParameters.WaterCoolingFactor);
+
+    }
+
+    /// <summary>
+    /// Call this to re-generate maps
+    /// </summary>
     public void GenerateWorld() {
         if (WorldMap != null) {
-            float[] elevationMap = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, 3);
-            WorldMap.SetElevation(elevationMap);
-            WorldMap.GenerateTemperature(m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature, 
-                    m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature, m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters,
-                m_WorlGenerationParameters.ElevationParameters.WaterElevation, m_WorlGenerationParameters.WorldTemperatureParameters.WaterCoolingFactor);
-            _applyTemperature();
+            GenerateElevation();
+            ApplyTemperature();
         }
     }
 
-    private void _applyTemperature() {
+    public void ApplyTemperature() {
         if (WorldMap != null) {
             float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
             float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];

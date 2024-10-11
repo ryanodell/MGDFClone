@@ -1,4 +1,5 @@
 ﻿using DefaultEcs;
+using ImGuiNET;
 using MGDFClone.Components;
 using MGDFClone.Core;
 using MGDFClone.Features.MapGen;
@@ -28,7 +29,7 @@ namespace MGDFClone.Screens {
             _camera.LookAt(Vector2.Zero);
             _worldGenerator = new WorldGeneratorV1(new WorldGenerationParameters {
                 WorldTemperatureParameters = WorldTemperatureParameters.Default,
-                ElevationParameters = new ElevationParameters { }
+                ElevationParameters = ElevationParameters.Default
             });
 
             //_worldGenerator = new WorldGeneratorV1(eWorldSize.Small, eSeason.Winter);
@@ -37,22 +38,22 @@ namespace MGDFClone.Screens {
         public override void LoadContent() {
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
                 _worldGenerator.GenerateWorld();
-                var data = _worldGenerator.WorldMap;
-                for (int i = 0; i < data.RegionTiles.Length; i++) {
-                    int row = i / data.Width;
-                    int column = i % data.Width;
-                    Entity tile = _world.CreateEntity();
-                    eSprite sprite = eSprite.None;
-                    Color color = Color.White;
-                    var tileType = TileTypeHelper.DetermineBaseTerrain(data.RegionTiles[i].Elevation);
-                    TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
-                    tile.Set(new DrawInfoComponent {
-                        Sprite = sprite,
-                        Color = color,
-                        Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                        Alpha = 1.0f
-                    });
-                }
+                //var data = _worldGenerator.WorldMap;
+                //for (int i = 0; i < data.RegionTiles.Length; i++) {
+                //    int row = i / data.Width;
+                //    int column = i % data.Width;
+                //    Entity tile = _world.CreateEntity();
+                //    eSprite sprite = eSprite.None;
+                //    Color color = Color.White;
+                //    var tileType = TileTypeHelper.DetermineBaseTerrain(data.RegionTiles[i].Elevation);
+                //    TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
+                //    tile.Set(new DrawInfoComponent {
+                //        Sprite = sprite,
+                //        Color = color,
+                //        Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                //        Alpha = 1.0f
+                //    });
+                //}
             }
         }
 
@@ -76,11 +77,29 @@ namespace MGDFClone.Screens {
                     var tileType = TileTypeHelper.DetermineBaseTerrain(data.RegionTiles[i].Elevation);
                     TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
                     _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
-                }
+                };
             }
             _spriteBatch.End();
             MainGame.ImGui.BeginLayout(gameTime);
-
+            ImGui.Begin("Elevation Parameters");
+            ElevationParameters elevationParameters = _worldGenerator.WorldGenerationParameters.ElevationParameters;
+            #region BackingFields
+            float imgui_WaterElevation = elevationParameters.WaterElevation;
+            float imgui_MaxElevationInMeters = elevationParameters.MaxElevationInMeters;
+            int imgui_ElevationOctaves = elevationParameters.PerlinOctaves;
+            #endregion
+            ImGui.InputInt("Octaves", ref imgui_ElevationOctaves);
+            ImGui.InputFloat("Water Elevation",ref imgui_WaterElevation);
+            ImGui.InputFloat("Max Elevation", ref imgui_MaxElevationInMeters);
+            elevationParameters.WaterElevation = imgui_WaterElevation;
+            elevationParameters.MaxElevationInMeters = imgui_MaxElevationInMeters;
+            elevationParameters.PerlinOctaves = imgui_ElevationOctaves;
+            if(ImGui.Button("Test")) {
+                //Console.WriteLine("Clicked");
+                _worldGenerator.GenerateWorld();
+            }
+            ImGui.End();
+            
             MainGame.ImGui.EndLayout();
         }
         private void _handleCameraMovement() {
