@@ -7,7 +7,7 @@ public class ElevationParameters {
     public int PerlinOctaves { get; set; }
 
     public static ElevationParameters Default = new ElevationParameters {
-        WaterElevation = 0.60f,
+        WaterElevation = 0.300f,
         MaxElevationInMeters = 7000.0f,
         PerlinOctaves = 3
     };

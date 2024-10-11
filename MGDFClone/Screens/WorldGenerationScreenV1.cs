@@ -90,12 +90,13 @@ namespace MGDFClone.Screens {
             int imgui_ElevationOctaves = elevationParameters.PerlinOctaves;
             #endregion
             ImGui.InputInt("Octaves", ref imgui_ElevationOctaves);
-            ImGui.InputFloat("Water Elevation",ref imgui_WaterElevation);
+            ImGui.SliderFloat("Water Elevation", ref imgui_WaterElevation, 0.0f, 1.0f);
+            //ImGui.InputFloat("Water Elevation",ref imgui_WaterElevation);
             ImGui.InputFloat("Max Elevation", ref imgui_MaxElevationInMeters);
             elevationParameters.WaterElevation = imgui_WaterElevation;
             elevationParameters.MaxElevationInMeters = imgui_MaxElevationInMeters;
             elevationParameters.PerlinOctaves = imgui_ElevationOctaves;
-            if(ImGui.Button("Generate World")) {
+            if(ImGui.Button("Re-Generate World")) {
                 _worldGenerator.GenerateWorld();
             }
             ImGui.End();

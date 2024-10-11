@@ -66,6 +66,25 @@ public class WorldGeneratorV1 {
             return eTileMapType.DeepWater; // Low elevation = Water
         if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation)
             return eTileMapType.Water; // Low elevation = Water
+        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + 0.05f)
+            return eTileMapType.Sand; // Slightly higher = Sand (beach)
+        else if (value < 0.70f)
+            return eTileMapType.Grass; // Middle = Grasslands
+        else if (value < 0.85f)
+            return eTileMapType.Hill; // Middle = Grasslands
+        else if (value < 0.90f)
+            return eTileMapType.Mountain; // Higher = Mountain
+        else
+            return eTileMapType.Snow; // Highest = Snow
+    }
+
+    [Obsolete]
+    public eTileMapType DetermineBaseTerrain(float value) {
+
+        if (value < 0.20f)
+            return eTileMapType.DeepWater; // Low elevation = Water
+        if (value < 0.30f)
+            return eTileMapType.Water; // Low elevation = Water
         else if (value < 0.35f)
             return eTileMapType.Sand; // Slightly higher = Sand (beach)
         else if (value < 0.70f)
