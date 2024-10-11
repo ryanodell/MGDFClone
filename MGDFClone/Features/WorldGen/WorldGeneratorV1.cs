@@ -22,6 +22,9 @@ public class WorldGeneratorV1 {
     //private float m_lapseRateF = 11.7f;
     //private eSeason m_season = eSeason.Winter;
     public WorldMap1 WorldMap { get; private set; }
+    private float m_waterToSandOffset = 0.05f;
+    private float m_sandToGrassOffet = 0.30f;
+    private float m_grassToHillOffset = 0.15f;
     Dictionary<eSeason, float> SeasonalTemperatureOffsets = new Dictionary<eSeason, float>() {
         { eSeason.Winter, -20.0f },
         { eSeason.Spring, 5.0f },  
@@ -67,11 +70,13 @@ public class WorldGeneratorV1 {
             return eTileMapType.DeepWater; // Low elevation = Water
         if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation)
             return eTileMapType.Water; // Low elevation = Water
-        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + 0.05f)
+        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset)
             return eTileMapType.Sand; // Slightly higher = Sand (beach)
-        else if (value < 0.70f)
+        //else if (value < 0.70f)
+        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet)
             return eTileMapType.Grass; // Middle = Grasslands
-        else if (value < 0.85f)
+        //else if (value < 0.85f)
+        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet + m_grassToHillOffset)
             return eTileMapType.Hill; // Middle = Grasslands
         else if (value < 0.90f)
             return eTileMapType.Mountain; // Higher = Mountain
@@ -122,7 +127,7 @@ public class WorldGeneratorV1 {
                 float elevationCooling = (elevationInMeters / 1000.0f) * m_WorlGenerationParameters.WorldTemperatureParameters.LapseRate;
                 //float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
                 float adjustedTemperature = baseTemperature - elevationCooling;
-                if (elevation < m_WorlGenerationParameters.ElevationParameters.WaterElevation) {
+                if (elevation < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet) {
                     float waterBlendFactor = (elevation / m_WorlGenerationParameters.ElevationParameters.WaterElevation);
                     adjustedTemperature = MathHelper.Lerp(m_WorlGenerationParameters.WorldTemperatureParameters.WaterTemperature, adjustedTemperature, waterBlendFactor);
                 }

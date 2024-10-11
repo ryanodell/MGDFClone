@@ -23,6 +23,7 @@ namespace MGDFClone.Screens {
         private ImGuiRenderer m_ImGui = MainGame.ImGui;
         private RenderTarget2D m_OverworldRenderTarget;
         private bool m_ShowTemperaturemap = false;
+        private float m_TemperatureAlpha = 1.0f;
         public WorldGenerationScreenV1(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -50,6 +51,7 @@ namespace MGDFClone.Screens {
 
         public override void Update(GameTime gameTime) {
             _handleCameraMovement();
+            _worldGenerator.ApplyTemperature();
         }
         public override void Draw(GameTime gameTime) {
             _graphics.GraphicsDevice.SetRenderTarget(m_OverworldRenderTarget);
@@ -67,6 +69,16 @@ namespace MGDFClone.Screens {
                     TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
                     _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                 };
+                if (m_ShowTemperaturemap) {
+                    for (int i = 0; i < data.RegionTiles.Length; i++) {
+                        int row = i / data.Width;
+                        int column = i % data.Height;
+                        float temperature = data.RegionTiles[i].Temperature;
+                        eSprite sprite = TileTypeHelper.DetermineTemperatureTile(temperature);
+                        Color color = TileTypeHelper.DetermineTemperatureColor(temperature);
+                        _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_TemperatureAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                    }
+                }
             }
             _spriteBatch.End();            
             _graphics.GraphicsDevice.SetRenderTarget(null);
@@ -90,7 +102,6 @@ namespace MGDFClone.Screens {
             float imgui_waterCoolingFactor = worldTemperatureParameters.WaterCoolingFactor;
             float imgui_waterTemperature = worldTemperatureParameters.WaterTemperature;
             float imgui_lapseRate = worldTemperatureParameters.LapseRate;
-            eSeason imgui_season = worldTemperatureParameters.Season;
             #endregion
 
             ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags.None;
@@ -103,6 +114,8 @@ namespace MGDFClone.Screens {
                 }
                 if (ImGui.BeginTabItem("World Temperature")) {
                     ImGui.Checkbox("Show", ref m_ShowTemperaturemap);
+                    ImGui.SameLine();
+                    ImGui.SliderFloat("Alpha", ref m_TemperatureAlpha, 0.0f, 1.0f);
                     ImGui.InputFloat("Min Temp", ref imgui_minimumTemperature);
                     ImGui.InputFloat("Max Temp", ref imgui_maximumTemperature);
                     ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
@@ -120,7 +133,8 @@ namespace MGDFClone.Screens {
                         for (int i = 0; i < seasonComboOptions.Length; i++) {
                             bool isSelected = (seasonSelectedIndex == i);
                             if (ImGui.Selectable(seasonComboOptions[i], isSelected)) {
-                                imgui_worldSize = (eWorldSize)Enum.Parse(typeof(eWorldSize), seasonComboOptions[i]);
+                                //imgui_season = (eSeason)Enum.Parse(typeof(eSeason), seasonComboOptions[i]);
+                                worldTemperatureParameters.Season = (eSeason)Enum.Parse(typeof(eSeason), seasonComboOptions[i]);
                             }
                             if (isSelected) {
                                 ImGui.SetItemDefaultFocus();
@@ -166,7 +180,6 @@ namespace MGDFClone.Screens {
             worldTemperatureParameters.WaterCoolingFactor = imgui_waterCoolingFactor;
             worldTemperatureParameters.WaterTemperature = imgui_waterTemperature;
             worldTemperatureParameters.LapseRate = imgui_lapseRate;
-            worldTemperatureParameters.Season = imgui_season;
             #endregion
             if (ImGui.Button("Re-Generate World")) {
                 _worldGenerator.GenerateWorld();
