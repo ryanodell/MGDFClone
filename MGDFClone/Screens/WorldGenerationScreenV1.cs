@@ -66,9 +66,11 @@ namespace MGDFClone.Screens {
             _spriteBatch.End();
             MainGame.ImGui.BeginLayout(gameTime);
             ImGui.Begin("World Generation Parameters");
+            WorldGenerationParameters worldGenerationParameters = _worldGenerator.WorldGenerationParameters;
             ElevationParameters elevationParameters = _worldGenerator.WorldGenerationParameters.ElevationParameters;
             WorldTemperatureParameters worldTemperatureParameters = _worldGenerator.WorldGenerationParameters.WorldTemperatureParameters;
             #region BackingFields
+            eWorldSize imgui_worldSize = worldGenerationParameters.WorldSize;
             float imgui_WaterElevation = elevationParameters.WaterElevation;
             float imgui_MaxElevationInMeters = elevationParameters.MaxElevationInMeters;
             int imgui_ElevationOctaves = elevationParameters.PerlinOctaves;
@@ -95,19 +97,19 @@ namespace MGDFClone.Screens {
                     ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
                     ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
                     ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
-                    string label = worldTemperatureParameters.Season.ToString();
-                    string[] comboOptions = Enum.GetNames(typeof(eSeason));
-                    int selectedIndex = 0;
-                    for (int i = 0; i < comboOptions.Length; i++) {
-                        if (comboOptions[i] == label) {
-                            selectedIndex = i;
+                    string seasonLabel = worldTemperatureParameters.Season.ToString();
+                    string[] seasonComboOptions = Enum.GetNames(typeof(eSeason));
+                    int seasonSelectedIndex = 0;
+                    for (int i = 0; i < seasonComboOptions.Length; i++) {
+                        if (seasonComboOptions[i] == seasonLabel) {
+                            seasonSelectedIndex = i;
                         }
                     }
-                    if(ImGui.BeginCombo("Season", label, ImGuiComboFlags.None)) {
-                        for (int i = 0; i < comboOptions.Length; i++) {
-                            bool isSelected = (selectedIndex == i);
-                            if (ImGui.Selectable(comboOptions[i], isSelected)) {
-                                imgui_season = (eSeason)Enum.Parse(typeof(eSeason), comboOptions[i]);
+                    if(ImGui.BeginCombo("Season", seasonLabel, ImGuiComboFlags.None)) {
+                        for (int i = 0; i < seasonComboOptions.Length; i++) {
+                            bool isSelected = (seasonSelectedIndex == i);
+                            if (ImGui.Selectable(seasonComboOptions[i], isSelected)) {
+                                imgui_worldSize = (eWorldSize)Enum.Parse(typeof(eWorldSize), seasonComboOptions[i]);
                             }
                             if (isSelected) {
                                 ImGui.SetItemDefaultFocus();
@@ -120,7 +122,31 @@ namespace MGDFClone.Screens {
                 }
             }
             ImGui.EndTabBar();
+
+            string worldsizeLabel = worldGenerationParameters.WorldSize.ToString();
+            string[] worlSizeComboOptions = Enum.GetNames(typeof(eWorldSize));
+            int worlSizeSelectedIndex = 0;
+            for (int i = 0; i < worlSizeComboOptions.Length; i++) {                
+                if (worlSizeComboOptions[i] == worldsizeLabel) {
+                    worlSizeSelectedIndex = i;
+                }
+            }
+            if (ImGui.BeginCombo("WorldSize", worldsizeLabel, ImGuiComboFlags.None)) {
+                for(int i = 0; i < worlSizeComboOptions.Length; i++) {
+                    bool isSelected = (worlSizeSelectedIndex == i);
+                    if (ImGui.Selectable(worlSizeComboOptions[i], isSelected)) {
+                        imgui_worldSize = (eWorldSize)Enum.Parse(typeof(eWorldSize), worlSizeComboOptions[i]);
+                    }
+                    if (isSelected) {
+                        ImGui.SetItemDefaultFocus();
+                    }
+                }
+                ImGui.EndCombo();
+            }
+
             #region BackingFields
+            worldGenerationParameters.WorldSize = imgui_worldSize;
+
             elevationParameters.WaterElevation = imgui_WaterElevation;
             elevationParameters.MaxElevationInMeters = imgui_MaxElevationInMeters;
             elevationParameters.PerlinOctaves = imgui_ElevationOctaves;
@@ -132,7 +158,6 @@ namespace MGDFClone.Screens {
             worldTemperatureParameters.LapseRate = imgui_lapseRate;
             worldTemperatureParameters.Season = imgui_season;
             #endregion
-
             if (ImGui.Button("Re-Generate World")) {
                 _worldGenerator.GenerateWorld();
             }

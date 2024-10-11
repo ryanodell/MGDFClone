@@ -56,6 +56,7 @@ public class WorldGeneratorV1 {
     /// </summary>
     public void GenerateWorld() {
         if (WorldMap != null) {
+            WorldMap = new WorldMap1(m_WorlGenerationParameters.WorldSize);
             GenerateElevation();
             ApplyTemperature();
         }
