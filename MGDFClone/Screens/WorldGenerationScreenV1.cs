@@ -21,6 +21,8 @@ namespace MGDFClone.Screens {
         private Camera2D _camera;
         WorldGeneratorV1 _worldGenerator;
         private ImGuiRenderer m_ImGui = MainGame.ImGui;
+        private RenderTarget2D m_OverworldRenderTarget;
+        private bool m_ShowTemperaturemap = false;
         public WorldGenerationScreenV1(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -35,6 +37,8 @@ namespace MGDFClone.Screens {
         }
 
         public override void LoadContent() {
+            //m_OverworldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None);
+            m_OverworldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
                 _worldGenerator.GenerateWorld();
             }
@@ -48,6 +52,7 @@ namespace MGDFClone.Screens {
             _handleCameraMovement();
         }
         public override void Draw(GameTime gameTime) {
+            _graphics.GraphicsDevice.SetRenderTarget(m_OverworldRenderTarget);
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, _camera.GetViewMatrix());
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
                 var data = _worldGenerator.WorldMap;
@@ -63,7 +68,12 @@ namespace MGDFClone.Screens {
                     _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                 };
             }
+            _spriteBatch.End();            
+            _graphics.GraphicsDevice.SetRenderTarget(null);
+            _spriteBatch.Begin();
+            _spriteBatch.Draw(m_OverworldRenderTarget, new Vector2(250.0f, 0.0f), Color.White);
             _spriteBatch.End();
+
             MainGame.ImGui.BeginLayout(gameTime);
             ImGui.Begin("World Generation Parameters");
             WorldGenerationParameters worldGenerationParameters = _worldGenerator.WorldGenerationParameters;
@@ -92,6 +102,7 @@ namespace MGDFClone.Screens {
                     ImGui.EndTabItem();
                 }
                 if (ImGui.BeginTabItem("World Temperature")) {
+                    ImGui.Checkbox("Show", ref m_ShowTemperaturemap);
                     ImGui.InputFloat("Min Temp", ref imgui_minimumTemperature);
                     ImGui.InputFloat("Max Temp", ref imgui_maximumTemperature);
                     ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
@@ -117,12 +128,11 @@ namespace MGDFClone.Screens {
                         }
                         ImGui.EndCombo();
                     }
-
                     ImGui.EndTabItem();
                 }
             }
             ImGui.EndTabBar();
-
+            ImGui.SeparatorText("World Parameters");
             string worldsizeLabel = worldGenerationParameters.WorldSize.ToString();
             string[] worlSizeComboOptions = Enum.GetNames(typeof(eWorldSize));
             int worlSizeSelectedIndex = 0;
