@@ -23,6 +23,7 @@ namespace MGDFClone.Screens {
         private ImGuiRenderer m_ImGui = MainGame.ImGui;
         private RenderTarget2D m_OverworldRenderTarget;
         private bool m_ShowTemperaturemap = false;
+        private bool m_ShowHumidity = true;
         private float m_TemperatureAlpha = 1.0f;
         public WorldGenerationScreenV1(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
@@ -31,14 +32,12 @@ namespace MGDFClone.Screens {
             _camera.LookAt(Vector2.Zero);
             _worldGenerator = new WorldGeneratorV1(new WorldGenerationParameters {
                 WorldTemperatureParameters = WorldTemperatureParameters.Default,
-                ElevationParameters = ElevationParameters.Default
+                ElevationParameters = ElevationParameters.Default,
+                ClimateParameters = ClimateParameters.Default
             });
-
-            //_worldGenerator = new WorldGeneratorV1(eWorldSize.Small, eSeason.Winter);
         }
 
         public override void LoadContent() {
-            //m_OverworldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None);
             m_OverworldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
                 _worldGenerator.GenerateWorld();
@@ -79,8 +78,29 @@ namespace MGDFClone.Screens {
                         _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_TemperatureAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                     }
                 }
+                if (m_ShowHumidity) {
+                    for (int i = 0; i < data.RegionTiles.Length; i++) {
+                        int row = i / data.Width;
+                        int column = i % data.Height;
+                        float humidity = data.RegionTiles[i].Humidity;
+                        eSprite sprite = eSprite.CapitalO;
+                        Color color = TileTypeHelper.DetermineHumidityColor(humidity * 100.0f);
+                        _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_TemperatureAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                        //Entity humidity = _world.CreateEntity();
+                        //humidity.Set(new DrawInfoComponent {
+                        //    Sprite = eSprite.CapitalO,
+                        //    Color = TileTypeHelper.DetermineHumidityColor(_finalHumidityMap[i] * 100.0f),
+                        //    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
+                        //    Alpha = 0.450f
+                        //});
+                        //humidityTiles.Add(humidity);
+                        //eSprite sprite = TileTypeHelper.DetermineTemperatureTile(humidity);
+                        //Color color = TileTypeHelper.DetermineTemperatureColor(humidity);
+                        //_spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_TemperatureAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                    }
+                }
             }
-            _spriteBatch.End();            
+            _spriteBatch.End();
             _graphics.GraphicsDevice.SetRenderTarget(null);
             _spriteBatch.Begin();
             _spriteBatch.Draw(m_OverworldRenderTarget, new Vector2(250.0f, 0.0f), Color.White);
@@ -91,6 +111,7 @@ namespace MGDFClone.Screens {
             WorldGenerationParameters worldGenerationParameters = _worldGenerator.WorldGenerationParameters;
             ElevationParameters elevationParameters = _worldGenerator.WorldGenerationParameters.ElevationParameters;
             WorldTemperatureParameters worldTemperatureParameters = _worldGenerator.WorldGenerationParameters.WorldTemperatureParameters;
+            ClimateParameters climateParameters = _worldGenerator.WorldGenerationParameters.ClimateParameters;
             #region BackingFields
             eWorldSize imgui_worldSize = worldGenerationParameters.WorldSize;
             float imgui_WaterElevation = elevationParameters.WaterElevation;
@@ -102,6 +123,17 @@ namespace MGDFClone.Screens {
             float imgui_waterCoolingFactor = worldTemperatureParameters.WaterCoolingFactor;
             float imgui_waterTemperature = worldTemperatureParameters.WaterTemperature;
             float imgui_lapseRate = worldTemperatureParameters.LapseRate;
+
+            float imgui_mountainThreshold = climateParameters.MountainThreshold;
+            float imgui_percipitationFactor = climateParameters.PercipitationFactor;
+            float imgui_rainShadowEffect = climateParameters.RainShadowEffect;
+            float imgui_eastwardDissipation = climateParameters.EastwardDissipation;
+            float imgui_baseMoisture = climateParameters.BaseMoisture;
+            float imgui_minimumHumidity = climateParameters.MinimumHumidity;
+            float imgui_maximumHunidty = climateParameters.MaximumHunidty;
+            int imgui_climatePerlinOctaves = climateParameters.PerlinOctaves;
+            float imgui_climateWaterFactor = climateParameters.WaterFactor;
+
             #endregion
 
             ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags.None;
@@ -129,7 +161,7 @@ namespace MGDFClone.Screens {
                             seasonSelectedIndex = i;
                         }
                     }
-                    if(ImGui.BeginCombo("Season", seasonLabel, ImGuiComboFlags.None)) {
+                    if (ImGui.BeginCombo("Season", seasonLabel, ImGuiComboFlags.None)) {
                         for (int i = 0; i < seasonComboOptions.Length; i++) {
                             bool isSelected = (seasonSelectedIndex == i);
                             if (ImGui.Selectable(seasonComboOptions[i], isSelected)) {
@@ -143,20 +175,33 @@ namespace MGDFClone.Screens {
                         ImGui.EndCombo();
                     }
                     ImGui.EndTabItem();
+                }                
+                if (ImGui.BeginTabItem("Climate")) {
+                    ImGui.Checkbox("Show", ref m_ShowHumidity);
+                    ImGui.InputFloat("Mtn Threshold", ref imgui_mountainThreshold);
+                    ImGui.InputFloat("Percip Factor", ref imgui_percipitationFactor);
+                    ImGui.InputFloat("Rain Shadow", ref imgui_rainShadowEffect);
+                    ImGui.InputFloat("Eastward Dis", ref imgui_eastwardDissipation);
+                    ImGui.InputFloat("Base Moisture", ref imgui_baseMoisture);
+                    ImGui.InputFloat("Min Humidity", ref imgui_minimumHumidity);
+                    ImGui.InputFloat("Max Humidity", ref imgui_maximumHunidty);
+                    ImGui.InputInt("Octaves", ref imgui_climatePerlinOctaves);
+                    ImGui.InputFloat("Water Factor", ref imgui_climateWaterFactor);
+                    ImGui.EndTabItem();
                 }
+                ImGui.EndTabBar();
             }
-            ImGui.EndTabBar();
             ImGui.SeparatorText("World Parameters");
             string worldsizeLabel = worldGenerationParameters.WorldSize.ToString();
             string[] worlSizeComboOptions = Enum.GetNames(typeof(eWorldSize));
             int worlSizeSelectedIndex = 0;
-            for (int i = 0; i < worlSizeComboOptions.Length; i++) {                
+            for (int i = 0; i < worlSizeComboOptions.Length; i++) {
                 if (worlSizeComboOptions[i] == worldsizeLabel) {
                     worlSizeSelectedIndex = i;
                 }
             }
             if (ImGui.BeginCombo("WorldSize", worldsizeLabel, ImGuiComboFlags.None)) {
-                for(int i = 0; i < worlSizeComboOptions.Length; i++) {
+                for (int i = 0; i < worlSizeComboOptions.Length; i++) {
                     bool isSelected = (worlSizeSelectedIndex == i);
                     if (ImGui.Selectable(worlSizeComboOptions[i], isSelected)) {
                         imgui_worldSize = (eWorldSize)Enum.Parse(typeof(eWorldSize), worlSizeComboOptions[i]);
@@ -167,6 +212,7 @@ namespace MGDFClone.Screens {
                 }
                 ImGui.EndCombo();
             }
+
 
             #region BackingFields
             worldGenerationParameters.WorldSize = imgui_worldSize;
@@ -180,6 +226,16 @@ namespace MGDFClone.Screens {
             worldTemperatureParameters.WaterCoolingFactor = imgui_waterCoolingFactor;
             worldTemperatureParameters.WaterTemperature = imgui_waterTemperature;
             worldTemperatureParameters.LapseRate = imgui_lapseRate;
+
+            climateParameters.MountainThreshold = imgui_mountainThreshold;
+            climateParameters.PercipitationFactor = imgui_percipitationFactor;
+            climateParameters.RainShadowEffect = imgui_rainShadowEffect;
+            climateParameters.EastwardDissipation = imgui_eastwardDissipation;
+            climateParameters.BaseMoisture = imgui_baseMoisture;
+            climateParameters.MinimumHumidity = imgui_minimumHumidity;
+            climateParameters.MaximumHunidty = imgui_maximumHunidty;
+            climateParameters.PerlinOctaves = imgui_climatePerlinOctaves;
+            climateParameters.WaterFactor = imgui_climateWaterFactor;
             #endregion
             if (ImGui.Button("Re-Generate World")) {
                 _worldGenerator.GenerateWorld();

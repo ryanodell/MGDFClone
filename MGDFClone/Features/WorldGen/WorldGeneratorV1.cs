@@ -37,20 +37,9 @@ public class WorldGeneratorV1 {
         WorldMap = new WorldMap1(m_WorlGenerationParameters.WorldSize);
     }
 
-    public WorldGeneratorV1(eWorldSize worldSize, eSeason season) {
-        WorldMap = new WorldMap1(worldSize);
-    }
-
-    public void ChangeSeason(eSeason season) {
-
-    }
-
     public void GenerateElevation() {
         float[] elevationMap = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, m_WorlGenerationParameters.ElevationParameters.PerlinOctaves);
         WorldMap.SetElevation(elevationMap);
-        WorldMap.GenerateTemperature(m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature,
-                m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature, m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters,
-            m_WorlGenerationParameters.ElevationParameters.WaterElevation, m_WorlGenerationParameters.WorldTemperatureParameters.WaterCoolingFactor);
 
     }
 
@@ -62,6 +51,7 @@ public class WorldGeneratorV1 {
             WorldMap = new WorldMap1(m_WorlGenerationParameters.WorldSize);
             GenerateElevation();
             ApplyTemperature();
+            ApplyHumidity();
         }
     }
 
@@ -138,8 +128,44 @@ public class WorldGeneratorV1 {
         }
     }
 
-    public void Clear() {
-        WorldMap = null;
+    public void ApplyHumidity() {
+        ClimateParameters climateParameters = m_WorlGenerationParameters.ClimateParameters;
+        WorldTemperatureParameters worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParameters;
+        ElevationParameters elevationParameters = m_WorlGenerationParameters.ElevationParameters;
+        float mountainThreshold = m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet + m_grassToHillOffset;
+        float[] initHumidty = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, climateParameters.PerlinOctaves);
+        float[] finalHumidity = new float[WorldMap.Width * WorldMap.Height];
+        WorldMap.SetInitialHumidty(initHumidty);
+        //Left to right pass
+        for (int y = 0; y < WorldMap.Height; y++) {
+            //Start with the west tile - Weather moves West to East
+            float moisture = initHumidty[y];
+            for (int x = 0; x < WorldMap.Width; x++) {
+                int index = y * WorldMap.Width + x;
+                float temperature = WorldMap.RegionTiles[index].Temperature;
+                float moistureCapacity = (float)Math.Exp(temperature / 200.5f) - 1.0f + climateParameters.BaseMoisture;
+                float elevation = WorldMap.RegionTiles[index].Elevation;
+                //Check if it's water to add extra moisture - simulate evaporation
+                if(elevation <= elevationParameters.WaterElevation) {
+                    moisture += climateParameters.WaterFactor;
+                }
+                //Handle mountains
+                if (elevation > mountainThreshold) {
+                    finalHumidity[index] = Math.Min(moisture * climateParameters.PercipitationFactor, moistureCapacity);
+                    moisture *= climateParameters.RainShadowEffect;
+                } else {
+                    moisture = Math.Min(moisture, moistureCapacity);
+                    finalHumidity[index] = moisture;
+                }
+                moisture *= climateParameters.EastwardDissipation;
+            }
+        }
+
+        // Optional: Normalize or scale the humidity values between 0 and 100
+        for (int i = 0; i < finalHumidity.Length; i++) {
+            finalHumidity[i] = Math.Clamp(finalHumidity[i], climateParameters.MinimumHumidity, climateParameters.MaximumHunidty);
+        }
+        WorldMap.SetFinalHumidity(finalHumidity);
     }
 }
 
@@ -175,10 +201,16 @@ public class WorldMap1 {
         }
     }
 
-    public void GenerateTemperature(float minimumTemperature, float maximumTemperature, float maxElevation, 
-        float waterElevation, float waterCoolingFactor) {
-        float[] temperatureMap = new float[m_width * m_height];
+    public void SetInitialHumidty(float[] initHumidity) {
+        for(int i = 0; i < m_regionTiles.Length; i++) {
+            m_regionTiles[i].InitHumidy = initHumidity[i];
+        }
+    }
 
+    public void SetFinalHumidity(float[] finalHumidty) {
+        for(int i = 0; i < m_regionTiles.Length; i++) {
+            m_regionTiles[i].Humidity = finalHumidty[i];
+        }
     }
 }
 
@@ -193,7 +225,8 @@ public class LocalTile1 {
 public class RegionTile1 {
     public float Elevation;
     public float Temperature;
-    public float Moisture;
+    public float Humidity;
+    public float InitHumidy;
 }
 public enum eSeason {
     Winter,
