@@ -18,6 +18,7 @@ public class ClimateParameters {
         BaseMoisture = 0.25f,
         MinimumHumidity = 0.0f,
         MaximumHunidty = 100.0f,
+        PerlinOctaves = 3,
         WaterFactor = 20.0f
     };
 }

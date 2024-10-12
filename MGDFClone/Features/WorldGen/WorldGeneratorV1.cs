@@ -37,7 +37,7 @@ public class WorldGeneratorV1 {
         WorldMap = new WorldMap1(m_WorlGenerationParameters.WorldSize);
     }
 
-    public void GenerateElevation() {
+    private void _initializeElevation() {
         float[] elevationMap = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, m_WorlGenerationParameters.ElevationParameters.PerlinOctaves);
         WorldMap.SetElevation(elevationMap);
 
@@ -49,8 +49,9 @@ public class WorldGeneratorV1 {
     public void GenerateWorld() {
         if (WorldMap != null) {
             WorldMap = new WorldMap1(m_WorlGenerationParameters.WorldSize);
-            GenerateElevation();
+            _initializeElevation();
             ApplyTemperature();
+            _initializeHumidity();
             ApplyHumidity();
         }
     }
@@ -128,18 +129,23 @@ public class WorldGeneratorV1 {
         }
     }
 
+    private void _initializeHumidity() {
+        ClimateParameters climateParameters = m_WorlGenerationParameters.ClimateParameters;
+        float[] initHumidty = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, climateParameters.PerlinOctaves);
+        WorldMap.SetInitialHumidty(initHumidty);
+    }
+
     public void ApplyHumidity() {
         ClimateParameters climateParameters = m_WorlGenerationParameters.ClimateParameters;
         WorldTemperatureParameters worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParameters;
         ElevationParameters elevationParameters = m_WorlGenerationParameters.ElevationParameters;
         float mountainThreshold = m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet + m_grassToHillOffset;
-        float[] initHumidty = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, climateParameters.PerlinOctaves);
         float[] finalHumidity = new float[WorldMap.Width * WorldMap.Height];
-        WorldMap.SetInitialHumidty(initHumidty);
         //Left to right pass
         for (int y = 0; y < WorldMap.Height; y++) {
             //Start with the west tile - Weather moves West to East
-            float moisture = initHumidty[y];
+            int leftmostTileIndex = y * WorldMap.Width;
+            float moisture = WorldMap.RegionTiles[leftmostTileIndex].InitHumidy;
             for (int x = 0; x < WorldMap.Width; x++) {
                 int index = y * WorldMap.Width + x;
                 float temperature = WorldMap.RegionTiles[index].Temperature;

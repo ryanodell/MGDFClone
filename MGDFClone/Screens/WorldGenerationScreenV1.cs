@@ -51,6 +51,7 @@ namespace MGDFClone.Screens {
         public override void Update(GameTime gameTime) {
             _handleCameraMovement();
             _worldGenerator.ApplyTemperature();
+            _worldGenerator.ApplyHumidity();
         }
         public override void Draw(GameTime gameTime) {
             _graphics.GraphicsDevice.SetRenderTarget(m_OverworldRenderTarget);
@@ -86,17 +87,6 @@ namespace MGDFClone.Screens {
                         eSprite sprite = eSprite.CapitalO;
                         Color color = TileTypeHelper.DetermineHumidityColor(humidity * 100.0f);
                         _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_TemperatureAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
-                        //Entity humidity = _world.CreateEntity();
-                        //humidity.Set(new DrawInfoComponent {
-                        //    Sprite = eSprite.CapitalO,
-                        //    Color = TileTypeHelper.DetermineHumidityColor(_finalHumidityMap[i] * 100.0f),
-                        //    Position = new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE),
-                        //    Alpha = 0.450f
-                        //});
-                        //humidityTiles.Add(humidity);
-                        //eSprite sprite = TileTypeHelper.DetermineTemperatureTile(humidity);
-                        //Color color = TileTypeHelper.DetermineTemperatureColor(humidity);
-                        //_spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_TemperatureAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                     }
                 }
             }

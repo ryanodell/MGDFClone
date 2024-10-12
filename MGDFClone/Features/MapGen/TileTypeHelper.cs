@@ -67,7 +67,7 @@ namespace MGDFClone.Features.MapGen {
         }
         public static Color DetermineHumidityColor(float value) {
             if(value > 100.0f) {
-                Log.Logger.Error($"Humidity exceeded threshold: {value}");
+                //Log.Logger.Error($"Humidity exceeded threshold: {value}");
             }
             switch (value) {
                 case < 5.0f:
