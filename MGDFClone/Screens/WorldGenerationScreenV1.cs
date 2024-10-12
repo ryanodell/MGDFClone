@@ -25,6 +25,7 @@ namespace MGDFClone.Screens {
         private bool m_ShowTemperaturemap = false;
         private bool m_ShowHumidity = true;
         private float m_TemperatureAlpha = 1.0f;
+        private float m_HumidityAlpha = 1.0f;
         public WorldGenerationScreenV1(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
             _world = new World();
             _camera = new Camera2D(_graphics.GraphicsDevice);
@@ -86,7 +87,7 @@ namespace MGDFClone.Screens {
                         float humidity = data.RegionTiles[i].Humidity;
                         eSprite sprite = eSprite.CapitalO;
                         Color color = TileTypeHelper.DetermineHumidityColor(humidity * 100.0f);
-                        _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_TemperatureAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                        _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color * m_HumidityAlpha, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                     }
                 }
             }
@@ -155,7 +156,6 @@ namespace MGDFClone.Screens {
                         for (int i = 0; i < seasonComboOptions.Length; i++) {
                             bool isSelected = (seasonSelectedIndex == i);
                             if (ImGui.Selectable(seasonComboOptions[i], isSelected)) {
-                                //imgui_season = (eSeason)Enum.Parse(typeof(eSeason), seasonComboOptions[i]);
                                 worldTemperatureParameters.Season = (eSeason)Enum.Parse(typeof(eSeason), seasonComboOptions[i]);
                             }
                             if (isSelected) {
@@ -168,6 +168,8 @@ namespace MGDFClone.Screens {
                 }                
                 if (ImGui.BeginTabItem("Climate")) {
                     ImGui.Checkbox("Show", ref m_ShowHumidity);
+                    ImGui.SameLine();
+                    ImGui.SliderFloat("Alpha", ref m_HumidityAlpha, 0.0f, 1.0f);
                     ImGui.InputFloat("Mtn Threshold", ref imgui_mountainThreshold);
                     ImGui.InputFloat("Percip Factor", ref imgui_percipitationFactor);
                     ImGui.InputFloat("Rain Shadow", ref imgui_rainShadowEffect);
