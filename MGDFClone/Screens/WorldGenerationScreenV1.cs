@@ -72,12 +72,18 @@ namespace MGDFClone.Screens {
                                     + _worldGenerator.WorldGenerationParameters.ElevationParameters.GrassToHillOffset) {
                         eSprite sprite = BiomeManagerV1.GetSpriteForBiome(biome);
                         Color color = Color.Green;
+                        if (regionTile.Temperature < 0.0f) {
+                            color = Color.White;
+                        }
                         _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                     } else {
                         eSprite sprite = eSprite.None;
                         Color color = Color.White;
                         var tileType = _worldGenerator.DetermineTerrainTile(data.RegionTiles[i].Elevation);
                         TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
+                        if(regionTile.Temperature < 0.0f) {
+                            color = Color.White;
+                        }
                         _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
 
                     }
