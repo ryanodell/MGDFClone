@@ -15,7 +15,7 @@ namespace MGDFClone.Models {
             WaterCoolingFactor = 10.0f,
             WaterTemperature = 50.0f,
             LapseRate = 11.7f,
-            Season = eSeason.Winter
+            Season = eSeason.Summer
         };
     }
 }

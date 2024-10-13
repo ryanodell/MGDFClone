@@ -210,8 +210,9 @@ public class WorldGeneratorV1 {
 
 public class WorldMap1 {
     private int m_width;
-    private int m_height;    
+    private int m_height;
     private float[] m_temperatureMap;
+    private float[] m_vegationMap;
     private eWorldSize m_worldSize;
     private RegionTile1[] m_regionTiles;
     public int Width => m_width;
@@ -222,8 +223,9 @@ public class WorldMap1 {
         m_height = (int)worldSize;
         m_worldSize = worldSize;
         m_temperatureMap = new float[m_width * m_height];
+        m_vegationMap = new float[m_width * m_height];
         m_regionTiles = new RegionTile1[m_width * m_height];
-        for(int i = 0; i < m_regionTiles.Length; i++) {
+        for (int i = 0; i < m_regionTiles.Length; i++) {
             m_regionTiles[i] = new();
         }
     }
@@ -241,8 +243,14 @@ public class WorldMap1 {
     }
 
     public void SetInitialHumidty(float[] initHumidity) {
-        for(int i = 0; i < m_regionTiles.Length; i++) {
+        for (int i = 0; i < m_regionTiles.Length; i++) {
             m_regionTiles[i].InitHumidy = initHumidity[i];
+        }
+    }
+
+    public void SetVegitation(float[] vegitationMap) {
+        for (int i = 0; i < m_regionTiles.Length; i++) {
+            m_regionTiles[i].Vegitation = vegitationMap[i];
         }
     }
 
@@ -266,7 +274,10 @@ public class RegionTile1 {
     public float Temperature;
     public float Humidity;
     public float InitHumidy;
+    public float Vegitation;
 }
+
+
 public enum eSeason {
     Winter,
     Spring,
