@@ -49,16 +49,16 @@ public static class BiomeManagerV1 {
 
     public static eBiome GetBiome(float temperature, float humidity) {
         eBiome returnValue = eBiome.Temperate;
-        if (temperature > 90 && humidity < 25) {
+        if (temperature > 100 && humidity < 0.25) {
             returnValue = eBiome.DryArid;
         }
-        if (temperature > 90 && humidity > 50) {
-            returnValue = eBiome.Subtropical;
-        }
-        if (temperature > 90 && humidity > 75) {
+        if (temperature > 90 && humidity > 0.75) {
             returnValue = eBiome.Tropical;
         }
-        if (temperature < 40 && humidity < 25) {
+        if (temperature > 90 && humidity > 0.50) {
+            returnValue = eBiome.Subtropical;
+        }
+        if (temperature < 40 && humidity < 0.25) {
             returnValue = eBiome.Cold;
         }
         return returnValue;
@@ -71,9 +71,9 @@ public static class BiomeManagerV1 {
             case eBiome.Tropical:
                 return eSprite.PalmTree;
             case eBiome.Subtropical:
-                return eSprite.BigTree;
+                return eSprite.Willow;
             case eBiome.Temperate:
-                return eSprite.SmallTree;
+                return eSprite.BigTree;
             case eBiome.Cold:
                 return eSprite.PineTree;
             default:
