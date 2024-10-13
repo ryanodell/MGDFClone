@@ -23,7 +23,7 @@ namespace MGDFClone.Screens {
         private ImGuiRenderer m_ImGui = MainGame.ImGui;
         private RenderTarget2D m_OverworldRenderTarget;
         private bool m_ShowTemperaturemap = false;
-        private bool m_ShowHumidity = true;
+        private bool m_ShowHumidity = false;
         private float m_TemperatureAlpha = 1.0f;
         private float m_HumidityAlpha = 1.0f;
         public WorldGenerationScreenV1(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
