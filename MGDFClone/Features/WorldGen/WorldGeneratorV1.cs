@@ -24,9 +24,6 @@ public class WorldGeneratorV1 {
     //private float m_lapseRateF = 11.7f;
     //private eSeason m_season = eSeason.Winter;
     public WorldMap1 WorldMap { get; private set; }
-    private float m_waterToSandOffset = 0.05f;
-    private float m_sandToGrassOffet = 0.30f;
-    private float m_grassToHillOffset = 0.15f;
     Dictionary<eSeason, float> SeasonalTemperatureOffsets = new Dictionary<eSeason, float>() {
         { eSeason.Winter, -20.0f },
         { eSeason.Spring, 5.0f },  
@@ -55,6 +52,7 @@ public class WorldGeneratorV1 {
             ApplyTemperature();
             _initializeHumidity();
             ApplyHumidity();
+            _initializeVegitation();
         }
     }
 
@@ -63,13 +61,15 @@ public class WorldGeneratorV1 {
             return eTileMapType.DeepWater; // Low elevation = Water
         if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation)
             return eTileMapType.Water; // Low elevation = Water
-        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset)
+        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset)
             return eTileMapType.Sand; // Slightly higher = Sand (beach)
         //else if (value < 0.70f)
-        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet)
+        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset 
+                + m_WorlGenerationParameters.ElevationParameters.SandToGrassOffet)
             return eTileMapType.Grass; // Middle = Grasslands
         //else if (value < 0.85f)
-        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet + m_grassToHillOffset)
+        else if (value < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset 
+                + m_WorlGenerationParameters.ElevationParameters.SandToGrassOffet + m_WorlGenerationParameters.ElevationParameters.GrassToHillOffset)
             return eTileMapType.Hill; // Middle = Grasslands
         else if (value < 0.90f)
             return eTileMapType.Mountain; // Higher = Mountain
@@ -120,7 +120,8 @@ public class WorldGeneratorV1 {
                 float elevationCooling = (elevationInMeters / 1000.0f) * m_WorlGenerationParameters.WorldTemperatureParameters.LapseRate;
                 //float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
                 float adjustedTemperature = baseTemperature - elevationCooling;
-                if (elevation < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet) {
+                if (elevation < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset 
+                        + m_WorlGenerationParameters.ElevationParameters.SandToGrassOffet) {
                     float waterBlendFactor = (elevation / m_WorlGenerationParameters.ElevationParameters.WaterElevation);
                     adjustedTemperature = MathHelper.Lerp(m_WorlGenerationParameters.WorldTemperatureParameters.WaterTemperature, adjustedTemperature, waterBlendFactor);
                 }
@@ -128,6 +129,24 @@ public class WorldGeneratorV1 {
                 temperatureMap[i] = adjustedTemperature;
             }
             WorldMap.SetTemperature(temperatureMap);
+        }
+    }
+
+    private void _initializeVegitation() {
+        float[] initVegitation = PerlinNoiseV4.GeneratePerlinNoise(WorldMap.Width, WorldMap.Height, 2);
+        WorldMap.SetVegitation(initVegitation);
+    }
+
+    public void ApplyVegitation() {
+        for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
+            var regionTile = WorldMap.RegionTiles[i];
+            var temperature = regionTile.Temperature;
+            var humidity = regionTile.Humidity;
+            var vegitation = regionTile.Vegitation;
+            if(vegitation > 0.25f) {
+                eBiome biome = BiomeManagerV1.GetBiome(temperature, humidity);
+                WorldMap.RegionTiles[i].Biome = biome;
+            }
         }
     }
 
@@ -141,7 +160,8 @@ public class WorldGeneratorV1 {
         ClimateParameters climateParameters = m_WorlGenerationParameters.ClimateParameters;
         WorldTemperatureParameters worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParameters;
         ElevationParameters elevationParameters = m_WorlGenerationParameters.ElevationParameters;
-        float mountainThreshold = m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet + m_grassToHillOffset;
+        float mountainThreshold = m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset 
+                + m_WorlGenerationParameters.ElevationParameters.SandToGrassOffet + m_WorlGenerationParameters.ElevationParameters.GrassToHillOffset;
         float[] finalHumidity = new float[WorldMap.Width * WorldMap.Height];
         //Left to right pass - the West to East progression of weather
         for (int y = 0; y < WorldMap.Height; y++) {
@@ -275,6 +295,7 @@ public class RegionTile1 {
     public float Humidity;
     public float InitHumidy;
     public float Vegitation;
+    public eBiome Biome;
 }
 
 

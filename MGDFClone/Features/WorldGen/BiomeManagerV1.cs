@@ -1,4 +1,6 @@
-﻿namespace MGDFClone.Features.WorldGen;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace MGDFClone.Features.WorldGen;
 public static class BiomeManagerV1 {
 
     public static Dictionary<eBiome, List<eTrees>> TreeCache = new Dictionary<eBiome, List<eTrees>> {
@@ -45,6 +47,39 @@ public static class BiomeManagerV1 {
         }
     };
 
+    public static eBiome GetBiome(float temperature, float humidity) {
+        eBiome returnValue = eBiome.Temperate;
+        if (temperature > 90 && humidity < 25) {
+            returnValue = eBiome.DryArid;
+        }
+        if (temperature > 90 && humidity > 50) {
+            returnValue = eBiome.Subtropical;
+        }
+        if (temperature > 90 && humidity > 75) {
+            returnValue = eBiome.Tropical;
+        }
+        if (temperature < 40 && humidity < 25) {
+            returnValue = eBiome.Cold;
+        }
+        return returnValue;
+    }
+
+    public static eSprite GetSpriteForBiome(eBiome biome) {
+        switch (biome) {
+            case eBiome.DryArid:
+                return eSprite.Cactus1;
+            case eBiome.Tropical:
+                return eSprite.PalmTree;
+            case eBiome.Subtropical:
+                return eSprite.BigTree;
+            case eBiome.Temperate:
+                return eSprite.SmallTree;
+            case eBiome.Cold:
+                return eSprite.PineTree;
+            default:
+                return eSprite.BigTree;
+        }
+    }
 }
 
 public enum eBiome {
