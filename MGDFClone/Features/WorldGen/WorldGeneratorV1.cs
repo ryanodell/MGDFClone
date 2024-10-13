@@ -2,6 +2,8 @@
 using MGDFClone.Features.PerlinNoise;
 using MGDFClone.Models;
 using Microsoft.Xna.Framework;
+using System;
+using System.Reflection;
 namespace MGDFClone.Features.WorldGen; 
 
 public class WorldGeneratorV1 {
@@ -141,7 +143,7 @@ public class WorldGeneratorV1 {
         ElevationParameters elevationParameters = m_WorlGenerationParameters.ElevationParameters;
         float mountainThreshold = m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_waterToSandOffset + m_sandToGrassOffet + m_grassToHillOffset;
         float[] finalHumidity = new float[WorldMap.Width * WorldMap.Height];
-        //Left to right pass
+        //Left to right pass - the West to East progression of weather
         for (int y = 0; y < WorldMap.Height; y++) {
             //Start with the west tile - Weather moves West to East
             int leftmostTileIndex = y * WorldMap.Width;
@@ -165,6 +167,37 @@ public class WorldGeneratorV1 {
                 }
                 moisture *= climateParameters.EastwardDissipation;
             }
+        }
+        //Not doing right to left pass for now..
+
+        //Top to bottom pass - push moisture to the tile below
+        for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
+            int row = i / WorldMap.Width;
+            int col = i % WorldMap.Height;
+            int currentIndex = row * WorldMap.Width + col;
+            float currentHumidity = finalHumidity[currentIndex];
+            if (row > 0) {
+                int aboveIndex = (row - 1) * WorldMap.Width + col;
+                float northHumiditySpread = currentHumidity * climateParameters.NortwardDissipation;
+                finalHumidity[aboveIndex] += northHumiditySpread;  // Add to the tile above
+                //finalHumidity[currentIndex] -= northHumiditySpread; // Reduce from current tile
+            }
+
+            // Spread moisture to the tile below (South)
+            if (row < WorldMap.Height - 1) {
+                int belowIndex = (row + 1) * WorldMap.Width + col;
+                float southHumiditySpread = currentHumidity * climateParameters.SouthwardDissipation;
+                finalHumidity[belowIndex] += southHumiditySpread;  // Add to the tile below
+                //finalHumidity[currentIndex] -= southHumiditySpread; // Reduce from current tile
+            }
+            //Don't need this, just for reference
+            //if(col > 0) {
+            //    int leftIndex = row * WorldMap.Width + (col - 1);
+            //}
+            //Don't need this, just for reference
+            //if(col < WorldMap.Height - 1) {
+            //    int rightIndex = row * WorldMap.Width + (col + 1);
+            //}
         }
 
         // Optional: Normalize or scale the humidity values between 0 and 100

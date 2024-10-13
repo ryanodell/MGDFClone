@@ -119,6 +119,9 @@ namespace MGDFClone.Screens {
             float imgui_percipitationFactor = climateParameters.PercipitationFactor;
             float imgui_rainShadowEffect = climateParameters.RainShadowEffect;
             float imgui_eastwardDissipation = climateParameters.EastwardDissipation;
+            float imgui_westwardDissipation = climateParameters.WestwardDissipation;
+            float imgui_northwardDissipation = climateParameters.NortwardDissipation;
+            float imgui_southwardDissipation = climateParameters.SouthwardDissipation;
             float imgui_baseMoisture = climateParameters.BaseMoisture;
             float imgui_minimumHumidity = climateParameters.MinimumHumidity;
             float imgui_maximumHunidty = climateParameters.MaximumHunidty;
@@ -173,7 +176,12 @@ namespace MGDFClone.Screens {
                     ImGui.InputFloat("Mtn Threshold", ref imgui_mountainThreshold);
                     ImGui.InputFloat("Percip Factor", ref imgui_percipitationFactor);
                     ImGui.InputFloat("Rain Shadow", ref imgui_rainShadowEffect);
-                    ImGui.InputFloat("Eastward Dis", ref imgui_eastwardDissipation);
+                    ImGui.SeparatorText("Dissipation");
+                    ImGui.InputFloat("N", ref imgui_northwardDissipation);
+                    ImGui.InputFloat("E", ref imgui_eastwardDissipation);
+                    ImGui.InputFloat("S", ref imgui_southwardDissipation);
+                    ImGui.InputFloat("W", ref imgui_westwardDissipation);
+                    ImGui.Separator();
                     ImGui.InputFloat("Base Moisture", ref imgui_baseMoisture);
                     ImGui.InputFloat("Min Humidity", ref imgui_minimumHumidity);
                     ImGui.InputFloat("Max Humidity", ref imgui_maximumHunidty);
@@ -223,6 +231,9 @@ namespace MGDFClone.Screens {
             climateParameters.PercipitationFactor = imgui_percipitationFactor;
             climateParameters.RainShadowEffect = imgui_rainShadowEffect;
             climateParameters.EastwardDissipation = imgui_eastwardDissipation;
+            climateParameters.WestwardDissipation = imgui_westwardDissipation;
+            climateParameters.NortwardDissipation = imgui_northwardDissipation;
+            climateParameters.SouthwardDissipation = imgui_southwardDissipation;
             climateParameters.BaseMoisture = imgui_baseMoisture;
             climateParameters.MinimumHumidity = imgui_minimumHumidity;
             climateParameters.MaximumHunidty = imgui_maximumHunidty;

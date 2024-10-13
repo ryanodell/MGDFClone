@@ -4,6 +4,9 @@ public class ClimateParameters {
     public float PercipitationFactor { get; set; }
     public float RainShadowEffect { get; set; }
     public float EastwardDissipation { get; set; }
+    public float WestwardDissipation { get; set; }
+    public float NortwardDissipation { get; set; }
+    public float SouthwardDissipation { get; set; }
     public float BaseMoisture { get; set; }
     public float MinimumHumidity { get; set; }
     public float MaximumHunidty { get; set; }
@@ -15,6 +18,9 @@ public class ClimateParameters {
         PercipitationFactor = 0.9f,
         RainShadowEffect = 0.2f,
         EastwardDissipation = 0.85f,
+        WestwardDissipation = 0.85f,
+        NortwardDissipation = 0.85f,
+        SouthwardDissipation = 0.85f,
         BaseMoisture = 0.25f,
         MinimumHumidity = 0.0f,
         MaximumHunidty = 100.0f,
