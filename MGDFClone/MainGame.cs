@@ -42,7 +42,8 @@ public class MainGame : Game {
         //ScreenManager.Instance.ChangeScreen<OverworldScreen>();
         //ScreenManager.Instance.ChangeScreen<MapGenerationScreen>();
         //ScreenManager.Instance.ChangeScreen<ClimateGenerationScreen>();
-        ScreenManager.Instance.ChangeScreen<WorldGenerationScreenV1>();
+        //ScreenManager.Instance.ChangeScreen<WorldGenerationScreenV1>();
+        ScreenManager.Instance.ChangeScreen<CosineWaveScreen>();
         Globals.TEXTURE = Content.Load<Texture2D>("kruggsmash");
         Globals.FONT = Content.Load<SpriteFont>("SDS_8x8");
         base.LoadContent();
