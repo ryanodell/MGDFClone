@@ -101,35 +101,117 @@ public class WorldGeneratorV1 {
             return eTileMapType.Snow; // Highest = Snow
     }
 
+    /// <summary>
+    /// This does not accept polar region parameter - treats polar region as "SOUTH" by default
+    /// </summary>
+    private void _applyTemperatureV1() {
+        float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
+        float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
+        for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
+            int row = i / WorldMap.Width;
+            int col = i % WorldMap.Width;
+            float elevation = WorldMap.RegionTiles[i].Elevation;
+            float latitudeFactor = row / (float)(WorldMap.Height - 1);
+            latitudeFactor = latitudeFactor * latitudeFactor;
+            latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
+            float baseTemperature = m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature -
+                latitudeFactor * (m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature);
+            // Calculate the temperature drop due to elevation.
+            float elevationInMeters = elevation * m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters;
+            // Calculate the cooling effect based on the elevation.
+            float elevationCooling = (elevationInMeters / 1000.0f) * m_WorlGenerationParameters.WorldTemperatureParameters.LapseRate;
+            //float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
+            float adjustedTemperature = baseTemperature - elevationCooling;
+            if (elevation < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset
+                    + m_WorlGenerationParameters.ElevationParameters.SandToGrassOffet) {
+                float waterBlendFactor = (elevation / m_WorlGenerationParameters.ElevationParameters.WaterElevation);
+                adjustedTemperature = MathHelper.Lerp(m_WorlGenerationParameters.WorldTemperatureParameters.WaterTemperature, adjustedTemperature, waterBlendFactor);
+            }
+            adjustedTemperature += seasonalOffset;
+            temperatureMap[i] = adjustedTemperature;
+        }
+        //Log.Logger.Information($"Min Temp: {temperatureMap.Min()}");
+        WorldMap.SetTemperature(temperatureMap);
+    }
+    private void _applyTemperatureV2() {
+        WorldTemperatureParameters worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParameters;
+        float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
+        float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
+
+        for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
+            int row = i / WorldMap.Width;
+            int col = i % WorldMap.Height;
+            float normalizedRow = (float)row / (WorldMap.Height - 1);
+
+            float distanceFromPole = 0.0f;
+            switch (worldTemperatureParameters.PolarRegion) {
+                case ePolarRegion.NorthPole:
+                    distanceFromPole = normalizedRow; // Closer to North Pole
+                    break;
+                case ePolarRegion.SouthPole:
+                    distanceFromPole = 1.0f - normalizedRow; // Closer to South Pole
+                    break;
+                case ePolarRegion.NorthAndSouthPole:
+                    distanceFromPole = Math.Min(normalizedRow, 1.0f - normalizedRow); // Closer to either pole
+                    break;
+                case ePolarRegion.NoPole:
+                    distanceFromPole = 0.5f; // Uniform temperature, no pole influence
+                    break;
+            }
+
+            // Cosine gradient to get values between -1 (cold) to 1 (hot)
+            float temperatureFactor = (float)Math.Cos(distanceFromPole * Math.PI);
+
+            // Normalize to a range between 0 (cold) and 1 (hot)
+            float baseTemperature = (temperatureFactor + 1f) / 2f;
+
+            // Add seasonal offset, then scale and clamp the result to a realistic temperature range
+            float finalTemperature = baseTemperature + seasonalOffset;
+
+            // Example: Clamp to a range like -30°C to +50°C
+            finalTemperature = Math.Clamp(finalTemperature * 80f - 30f, -30f, 50f);
+
+            temperatureMap[i] = finalTemperature;
+        }
+
+        WorldMap.SetTemperature(temperatureMap);
+    }
+
+    //private void _applyTemperatureV2() {
+    //    WorldTemperatureParameters worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParameters;
+    //    float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
+    //    float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
+    //    for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
+    //        int row = i / WorldMap.Width;
+    //        int col = i % WorldMap.Height;
+    //        float normalizedRow = (float)row / (WorldMap.Height - 1);
+    //        float distanceFromPole = 0.0f;
+    //        switch(worldTemperatureParameters.PolarRegion) {
+    //            case ePolarRegion.NorthPole:
+    //                distanceFromPole = normalizedRow;
+    //                break;
+    //            case ePolarRegion.SouthPole:
+    //                distanceFromPole = 1.0f - normalizedRow;
+    //                break;
+    //            case ePolarRegion.NorthAndSouthPole:
+    //                distanceFromPole = Math.Min(normalizedRow, 1.0f - normalizedRow);
+    //                break;
+    //            case ePolarRegion.NoPole:
+    //                distanceFromPole = 0.5f;
+    //                break;
+    //        }
+    //        float temperatureFactor = (float)Math.Cos(distanceFromPole * Math.PI); // Values from -1 (pole) to 1 (equator)
+    //        // Normalize to 0 (cold) to 1 (hot)
+    //        float baseTemperature = (temperatureFactor + 1f) / 2f;
+    //        temperatureMap[i] = baseTemperature; //+ seasonalOffset;
+    //        //Apply elevation but leave this for now to see how things "Arc"
+    //    }
+    //    WorldMap.SetTemperature(temperatureMap);
+    //}
+
     public void ApplyTemperature() {
         if (WorldMap != null) {
-            float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
-            float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
-            for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
-                int row = i / WorldMap.Width;
-                int col = i % WorldMap.Width;
-                float elevation = WorldMap.RegionTiles[i].Elevation;
-                float latitudeFactor = row / (float)(WorldMap.Height - 1);
-                latitudeFactor = latitudeFactor * latitudeFactor;
-                latitudeFactor = 1.0f / (1.0f + MathF.Exp(-10.0f * (latitudeFactor - 0.5f)));
-                float baseTemperature = m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature -
-                    latitudeFactor * (m_WorlGenerationParameters.WorldTemperatureParameters.MaximumTemperature - m_WorlGenerationParameters.WorldTemperatureParameters.MinimumTemperature);
-                // Calculate the temperature drop due to elevation.
-                float elevationInMeters = elevation * m_WorlGenerationParameters.ElevationParameters.MaxElevationInMeters;
-                // Calculate the cooling effect based on the elevation.
-                float elevationCooling = (elevationInMeters / 1000.0f) * m_WorlGenerationParameters.WorldTemperatureParameters.LapseRate;
-                //float adjustedTemperature = baseTemperature - (elevation * _waterCoolingFactor);
-                float adjustedTemperature = baseTemperature - elevationCooling;
-                if (elevation < m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset
-                        + m_WorlGenerationParameters.ElevationParameters.SandToGrassOffet) {
-                    float waterBlendFactor = (elevation / m_WorlGenerationParameters.ElevationParameters.WaterElevation);
-                    adjustedTemperature = MathHelper.Lerp(m_WorlGenerationParameters.WorldTemperatureParameters.WaterTemperature, adjustedTemperature, waterBlendFactor);
-                }
-                adjustedTemperature += seasonalOffset;
-                temperatureMap[i] = adjustedTemperature;
-            }
-            //Log.Logger.Information($"Min Temp: {temperatureMap.Min()}");
-            WorldMap.SetTemperature(temperatureMap);
+            _applyTemperatureV2();
         }
     }
 
@@ -297,6 +379,12 @@ public class RegionTile1 {
     public eBiome Biome;
 }
 
+public enum ePolarRegion {
+    SouthPole,
+    NorthPole,
+    NorthAndSouthPole,
+    NoPole
+}
 
 public enum eSeason {
     Winter,

@@ -8,6 +8,7 @@ namespace MGDFClone.Models {
         public float WaterTemperature { get; set; }
         public float LapseRate { get; set; }
         public eSeason Season { get; set; }
+        public ePolarRegion PolarRegion { get; set; }
 
         public static WorldTemperatureParameters Default = new WorldTemperatureParameters {
             MinimumTemperature = -20.0f,
@@ -15,7 +16,8 @@ namespace MGDFClone.Models {
             WaterCoolingFactor = 10.0f,
             WaterTemperature = 50.0f,
             LapseRate = 11.7f,
-            Season = eSeason.Summer
+            Season = eSeason.Summer,
+            PolarRegion = ePolarRegion.SouthPole
         };
     }
 }
