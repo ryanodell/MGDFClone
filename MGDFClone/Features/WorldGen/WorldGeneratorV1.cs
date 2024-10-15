@@ -170,8 +170,10 @@ public class WorldGeneratorV1 {
                 rowTemperatureMap[row] = MathHelper.Lerp(maxModerateTemperature, maxExtremeTemperature, distanceFromEdge);
             }
         }
-
-        return rowTemperatureMap;
+        //This is a temporary hack
+        var reverse = rowTemperatureMap.Reverse().ToArray();
+        return reverse;
+        //return rowTemperatureMap;
     }
 
     //private void _applyTemperatureV2() {
