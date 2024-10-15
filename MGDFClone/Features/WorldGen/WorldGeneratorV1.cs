@@ -133,48 +133,45 @@ public class WorldGeneratorV1 {
         //Log.Logger.Information($"Min Temp: {temperatureMap.Min()}");
         WorldMap.SetTemperature(temperatureMap);
     }
+    //TOD: Update this to use CosineWaveScreen's CalculateBaseTemperature method - keep in mind this only returns temperatures for the given "row"
     private void _applyTemperatureV2() {
-        WorldTemperatureParameters worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParameters;
+        WorldTemperatureParametersV2 worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParametersV2;
         float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
-        float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
+        //float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
+        float[] temperatureRows = _calculateBaseTemperature(WorldMap.Height, worldTemperatureParameters.MinimumModerateTemperature, worldTemperatureParameters.MaximumModerateTemperature,
+            worldTemperatureParameters.MinimumExtremeTemperature, worldTemperatureParameters.MaximumExtremeTemperature, worldTemperatureParameters.ModerateRegionHeightFraction);
 
         for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
-            int row = i / WorldMap.Width;
-            int col = i % WorldMap.Height;
-            float normalizedRow = (float)row / (WorldMap.Height - 1);
-
-            float distanceFromPole = 0.0f;
-            switch (worldTemperatureParameters.PolarRegion) {
-                case ePolarRegion.NorthPole:
-                    distanceFromPole = normalizedRow; // Closer to North Pole
-                    break;
-                case ePolarRegion.SouthPole:
-                    distanceFromPole = 1.0f - normalizedRow; // Closer to South Pole
-                    break;
-                case ePolarRegion.NorthAndSouthPole:
-                    distanceFromPole = Math.Min(normalizedRow, 1.0f - normalizedRow); // Closer to either pole
-                    break;
-                case ePolarRegion.NoPole:
-                    distanceFromPole = 0.5f; // Uniform temperature, no pole influence
-                    break;
-            }
-
-            // Cosine gradient to get values between -1 (cold) to 1 (hot)
-            float temperatureFactor = (float)Math.Cos(distanceFromPole * Math.PI);
-
-            // Normalize to a range between 0 (cold) and 1 (hot)
-            float baseTemperature = (temperatureFactor + 1f) / 2f;
-
-            // Add seasonal offset, then scale and clamp the result to a realistic temperature range
-            float finalTemperature = baseTemperature + seasonalOffset;
-
-            // Example: Clamp to a range like -30°C to +50°C
-            finalTemperature = Math.Clamp(finalTemperature * 80f - 30f, -30f, 50f);
-
-            temperatureMap[i] = finalTemperature;
+            int row = i / WorldMap.Height;
+            temperatureMap[i] = temperatureRows[row];
         }
 
         WorldMap.SetTemperature(temperatureMap);
+    }
+
+    float[] _calculateBaseTemperature(int mapHeight, float minModerateTemperature, float maxModerateTemperature, float minExtremeTemperature, float maxExtremeTemperature, float moderateRegionHeightFraction) {
+        float[] rowTemperatureMap = new float[mapHeight];  // Array to store base temperature for each row
+
+        int moderateRegionStart = (int)(mapHeight * (1.0f - moderateRegionHeightFraction) / 2.0f);  // Start of the moderate region
+        int moderateRegionEnd = mapHeight - moderateRegionStart;  // End of the moderate region
+
+        // Loop through each row (Y-coordinate in the map)
+        for (int row = 0; row < mapHeight; row++) {
+            if (row >= moderateRegionStart && row <= moderateRegionEnd) {
+                // Moderate region (in the middle)
+                rowTemperatureMap[row] = MathHelper.Lerp(minModerateTemperature, maxModerateTemperature, (float)(row - moderateRegionStart) / (moderateRegionEnd - moderateRegionStart));
+            } else if (row < moderateRegionStart) {
+                // Bottom extreme region - moving towards colder temperatures
+                float distanceFromEdge = (float)row / moderateRegionStart;
+                rowTemperatureMap[row] = MathHelper.Lerp(minExtremeTemperature, minModerateTemperature, distanceFromEdge);
+            } else {
+                // Top extreme region - moving towards hotter temperatures
+                float distanceFromEdge = (float)(row - moderateRegionEnd) / (mapHeight - moderateRegionEnd);
+                rowTemperatureMap[row] = MathHelper.Lerp(maxModerateTemperature, maxExtremeTemperature, distanceFromEdge);
+            }
+        }
+
+        return rowTemperatureMap;
     }
 
     //private void _applyTemperatureV2() {

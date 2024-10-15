@@ -138,10 +138,10 @@ namespace MGDFClone.Screens {
             //End v1
 
             //V2
-            float imgui_MinimumModerateTemperature = worldTemperatureParametersV2.MinimumModerateTemperature;
-            float imgui_MaximumModerateTemperature = worldTemperatureParametersV2.MaximumModerateTemperature;
-            float imgui_MinimumExtremeTemperature = worldTemperatureParametersV2.MinimumExtremeTemperature;
-            float imgui_MaximumExtremeTemperature = worldTemperatureParametersV2.MaximumExtremeTemperature;
+            float imgui_MinimumModerateTemperature =   worldTemperatureParametersV2.MinimumModerateTemperature;
+            float imgui_MaximumModerateTemperature =   worldTemperatureParametersV2.MaximumModerateTemperature;
+            float imgui_MinimumExtremeTemperature =    worldTemperatureParametersV2.MinimumExtremeTemperature;
+            float imgui_MaximumExtremeTemperature =    worldTemperatureParametersV2.MaximumExtremeTemperature;
             float imgui_ModerateRegionHeightFraction = worldTemperatureParametersV2.ModerateRegionHeightFraction;
             //End v2
 
@@ -168,16 +168,18 @@ namespace MGDFClone.Screens {
                     ImGui.InputFloat("Max Elevation", ref imgui_MaxElevationInMeters);
                     ImGui.EndTabItem();
                 }
-                //TODO: Remove Old World Temp params and replace with the new
-                if (ImGui.BeginTabItem("World Temperature")) {
+                if (ImGui.BeginTabItem("World Temperature V2")) {
                     ImGui.Checkbox("Show", ref m_ShowTemperaturemap);
                     ImGui.SameLine();
                     ImGui.SliderFloat("Alpha", ref m_TemperatureAlpha, 0.0f, 1.0f);
-                    ImGui.InputFloat("Min Temp", ref imgui_minimumTemperature);
-                    ImGui.InputFloat("Max Temp", ref imgui_maximumTemperature);
-                    ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
-                    ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
-                    ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
+                    ImGui.InputFloat("Min M-Temp", ref imgui_MinimumModerateTemperature);
+                    ImGui.InputFloat("Max M-Temp", ref imgui_MaximumModerateTemperature);
+                    ImGui.InputFloat("Min E-Temp", ref imgui_MinimumExtremeTemperature);
+                    ImGui.InputFloat("Max E-Temp", ref imgui_MaximumExtremeTemperature);
+                    ImGui.InputFloat("Mod Region", ref imgui_ModerateRegionHeightFraction);
+                    //ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
+                    //ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
+                    //ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
                     string seasonLabel = worldTemperatureParameters.Season.ToString();
                     string[] seasonComboOptions = Enum.GetNames(typeof(eSeason));
                     int seasonSelectedIndex = 0;
@@ -199,7 +201,39 @@ namespace MGDFClone.Screens {
                         ImGui.EndCombo();
                     }
                     ImGui.EndTabItem();
-                }                
+                }
+                //TODO: Remove Old World Temp params and replace with the new
+                //if (ImGui.BeginTabItem("World Temperature")) {
+                //    ImGui.Checkbox("Show", ref m_ShowTemperaturemap);
+                //    ImGui.SameLine();
+                //    ImGui.SliderFloat("Alpha", ref m_TemperatureAlpha, 0.0f, 1.0f);
+                //    ImGui.InputFloat("Min Temp", ref imgui_minimumTemperature);
+                //    ImGui.InputFloat("Max Temp", ref imgui_maximumTemperature);
+                //    ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
+                //    ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
+                //    ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
+                //    string seasonLabel = worldTemperatureParameters.Season.ToString();
+                //    string[] seasonComboOptions = Enum.GetNames(typeof(eSeason));
+                //    int seasonSelectedIndex = 0;
+                //    for (int i = 0; i < seasonComboOptions.Length; i++) {
+                //        if (seasonComboOptions[i] == seasonLabel) {
+                //            seasonSelectedIndex = i;
+                //        }
+                //    }
+                //    if (ImGui.BeginCombo("Season", seasonLabel, ImGuiComboFlags.None)) {
+                //        for (int i = 0; i < seasonComboOptions.Length; i++) {
+                //            bool isSelected = (seasonSelectedIndex == i);
+                //            if (ImGui.Selectable(seasonComboOptions[i], isSelected)) {
+                //                worldTemperatureParameters.Season = (eSeason)Enum.Parse(typeof(eSeason), seasonComboOptions[i]);
+                //            }
+                //            if (isSelected) {
+                //                ImGui.SetItemDefaultFocus();
+                //            }
+                //        }
+                //        ImGui.EndCombo();
+                //    }
+                //    ImGui.EndTabItem();
+                //}                
                 if (ImGui.BeginTabItem("Climate")) {
                     ImGui.Checkbox("Show", ref m_ShowHumidity);
                     ImGui.SameLine();
@@ -257,6 +291,12 @@ namespace MGDFClone.Screens {
             worldTemperatureParameters.WaterCoolingFactor = imgui_waterCoolingFactor;
             worldTemperatureParameters.WaterTemperature = imgui_waterTemperature;
             worldTemperatureParameters.LapseRate = imgui_lapseRate;
+
+            worldTemperatureParametersV2.MinimumModerateTemperature = imgui_MinimumModerateTemperature;
+            worldTemperatureParametersV2.MaximumModerateTemperature = imgui_MaximumModerateTemperature;
+            worldTemperatureParametersV2.MinimumExtremeTemperature = imgui_MinimumExtremeTemperature;
+            worldTemperatureParametersV2.MaximumExtremeTemperature = imgui_MaximumExtremeTemperature;
+            worldTemperatureParametersV2.ModerateRegionHeightFraction = imgui_ModerateRegionHeightFraction;
 
             climateParameters.MountainThreshold = imgui_mountainThreshold;
             climateParameters.PercipitationFactor = imgui_percipitationFactor;
