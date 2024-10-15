@@ -239,7 +239,6 @@ public class WorldGeneratorV1 {
 
     public void ApplyHumidity() {
         ClimateParameters climateParameters = m_WorlGenerationParameters.ClimateParameters;
-        WorldTemperatureParameters worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParameters;
         ElevationParameters elevationParameters = m_WorlGenerationParameters.ElevationParameters;
         float mountainThreshold = m_WorlGenerationParameters.ElevationParameters.WaterElevation + m_WorlGenerationParameters.ElevationParameters.WaterToSandOffset
                 + m_WorlGenerationParameters.ElevationParameters.SandToGrassOffet + m_WorlGenerationParameters.ElevationParameters.GrassToHillOffset;

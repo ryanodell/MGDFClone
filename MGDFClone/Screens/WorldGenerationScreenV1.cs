@@ -34,7 +34,8 @@ namespace MGDFClone.Screens {
             _worldGenerator = new WorldGeneratorV1(new WorldGenerationParameters {
                 WorldTemperatureParameters = WorldTemperatureParameters.Default,
                 ElevationParameters = ElevationParameters.Default,
-                ClimateParameters = ClimateParameters.Default
+                ClimateParameters = ClimateParameters.Default,
+                WorldTemperatureParametersV2 = WorldTemperatureParametersV2.Default
             });
         }
 
@@ -117,9 +118,10 @@ namespace MGDFClone.Screens {
 
             MainGame.ImGui.BeginLayout(gameTime);
             ImGui.Begin("World Generation Parameters");
-            WorldGenerationParameters worldGenerationParameters = _worldGenerator.WorldGenerationParameters;
+            WorldGenerationParameters worldGenerationParameters = _worldGenerator.WorldGenerationParameters;            
             ElevationParameters elevationParameters = _worldGenerator.WorldGenerationParameters.ElevationParameters;
             WorldTemperatureParameters worldTemperatureParameters = _worldGenerator.WorldGenerationParameters.WorldTemperatureParameters;
+            WorldTemperatureParametersV2 worldTemperatureParametersV2 = _worldGenerator.WorldGenerationParameters.WorldTemperatureParametersV2;
             ClimateParameters climateParameters = _worldGenerator.WorldGenerationParameters.ClimateParameters;
             #region BackingFields
             eWorldSize imgui_worldSize = worldGenerationParameters.WorldSize;
@@ -127,11 +129,21 @@ namespace MGDFClone.Screens {
             float imgui_MaxElevationInMeters = elevationParameters.MaxElevationInMeters;
             int imgui_ElevationOctaves = elevationParameters.PerlinOctaves;
 
+            //V1
             float imgui_minimumTemperature = worldTemperatureParameters.MinimumTemperature;
             float imgui_maximumTemperature = worldTemperatureParameters.MaximumTemperature;
             float imgui_waterCoolingFactor = worldTemperatureParameters.WaterCoolingFactor;
             float imgui_waterTemperature = worldTemperatureParameters.WaterTemperature;
             float imgui_lapseRate = worldTemperatureParameters.LapseRate;
+            //End v1
+
+            //V2
+            float imgui_MinimumModerateTemperature = worldTemperatureParametersV2.MinimumModerateTemperature;
+            float imgui_MaximumModerateTemperature = worldTemperatureParametersV2.MaximumModerateTemperature;
+            float imgui_MinimumExtremeTemperature = worldTemperatureParametersV2.MinimumExtremeTemperature;
+            float imgui_MaximumExtremeTemperature = worldTemperatureParametersV2.MaximumExtremeTemperature;
+            float imgui_ModerateRegionHeightFraction = worldTemperatureParametersV2.ModerateRegionHeightFraction;
+            //End v2
 
             float imgui_mountainThreshold = climateParameters.MountainThreshold;
             float imgui_percipitationFactor = climateParameters.PercipitationFactor;
@@ -156,6 +168,7 @@ namespace MGDFClone.Screens {
                     ImGui.InputFloat("Max Elevation", ref imgui_MaxElevationInMeters);
                     ImGui.EndTabItem();
                 }
+                //TODO: Remove Old World Temp params and replace with the new
                 if (ImGui.BeginTabItem("World Temperature")) {
                     ImGui.Checkbox("Show", ref m_ShowTemperaturemap);
                     ImGui.SameLine();

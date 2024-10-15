@@ -1,6 +1,23 @@
 ﻿using MGDFClone.Features.WorldGen;
 
 namespace MGDFClone.Models {
+    public class WorldTemperatureParametersV2 {
+        public float MinimumModerateTemperature { get; set; }
+        public float MaximumModerateTemperature { get; set; }
+        public float MinimumExtremeTemperature { get; set; }
+        public float MaximumExtremeTemperature { get; set; }
+        public float ModerateRegionHeightFraction { get; set; }
+
+        public static WorldTemperatureParametersV2 Default = new WorldTemperatureParametersV2 {
+            MinimumModerateTemperature = 60.0f,
+            MaximumModerateTemperature = 90.0f,
+            MinimumExtremeTemperature = -20.0f,
+            MaximumExtremeTemperature = 110.0f,
+            ModerateRegionHeightFraction = 0.50f
+        };
+    }
+
+
     public class WorldTemperatureParameters {
         public float MinimumTemperature {get; set;}
         public float MaximumTemperature {get; set;}
