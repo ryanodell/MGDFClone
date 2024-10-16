@@ -73,7 +73,7 @@ namespace MGDFClone.Screens {
                                     + _worldGenerator.WorldGenerationParameters.ElevationParameters.GrassToHillOffset) {
                         eSprite sprite = BiomeManagerV1.GetSpriteForBiome(biome);
                         Color color = Color.Green;
-                        if (regionTile.Temperature < 0.0f) {
+                        if (regionTile.Temperature < 10.0f) {
                             color = Color.White;
                         }
                         _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
@@ -182,7 +182,7 @@ namespace MGDFClone.Screens {
                     //ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
                     //ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
                     //ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
-                    string seasonLabel = worldTemperatureParameters.Season.ToString();
+                    string seasonLabel = worldTemperatureParametersV2.Season.ToString();
                     string[] seasonComboOptions = Enum.GetNames(typeof(eSeason));
                     int seasonSelectedIndex = 0;
                     for (int i = 0; i < seasonComboOptions.Length; i++) {
@@ -194,7 +194,7 @@ namespace MGDFClone.Screens {
                         for (int i = 0; i < seasonComboOptions.Length; i++) {
                             bool isSelected = (seasonSelectedIndex == i);
                             if (ImGui.Selectable(seasonComboOptions[i], isSelected)) {
-                                worldTemperatureParameters.Season = (eSeason)Enum.Parse(typeof(eSeason), seasonComboOptions[i]);
+                                worldTemperatureParametersV2.Season = (eSeason)Enum.Parse(typeof(eSeason), seasonComboOptions[i]);
                             }
                             if (isSelected) {
                                 ImGui.SetItemDefaultFocus();
@@ -235,7 +235,7 @@ namespace MGDFClone.Screens {
                 //        ImGui.EndCombo();
                 //    }
                 //    ImGui.EndTabItem();
-                //}                
+                //}
                 if (ImGui.BeginTabItem("Climate")) {
                     ImGui.Checkbox("Show", ref m_ShowHumidity);
                     ImGui.SameLine();

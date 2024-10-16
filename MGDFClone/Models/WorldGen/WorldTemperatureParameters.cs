@@ -8,6 +8,7 @@ namespace MGDFClone.Models {
         public float MaximumExtremeTemperature { get; set; }
         public float ModerateRegionHeightFraction { get; set; }
         public float ElevationInfluence { get; set; }
+        public eSeason Season { get; set; }
 
         public static WorldTemperatureParametersV2 Default = new WorldTemperatureParametersV2 {
             MinimumModerateTemperature = 60.0f,
@@ -15,7 +16,8 @@ namespace MGDFClone.Models {
             MinimumExtremeTemperature = -20.0f,
             MaximumExtremeTemperature = 110.0f,
             ModerateRegionHeightFraction = 0.50f,
-            ElevationInfluence = 0.2f
+            ElevationInfluence = 0.2f,
+            Season = eSeason.Summer
         };
     }
 
