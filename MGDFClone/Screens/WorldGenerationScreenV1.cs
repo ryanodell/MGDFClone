@@ -143,6 +143,7 @@ namespace MGDFClone.Screens {
             float imgui_MinimumExtremeTemperature =    worldTemperatureParametersV2.MinimumExtremeTemperature;
             float imgui_MaximumExtremeTemperature =    worldTemperatureParametersV2.MaximumExtremeTemperature;
             float imgui_ModerateRegionHeightFraction = worldTemperatureParametersV2.ModerateRegionHeightFraction;
+            float imgui_ElevationInfluence = worldTemperatureParametersV2.ElevationInfluence;
             //End v2
 
             float imgui_mountainThreshold = climateParameters.MountainThreshold;
@@ -177,6 +178,7 @@ namespace MGDFClone.Screens {
                     ImGui.InputFloat("Min E-Temp", ref imgui_MinimumExtremeTemperature);
                     ImGui.InputFloat("Max E-Temp", ref imgui_MaximumExtremeTemperature);
                     ImGui.InputFloat("Mod Region", ref imgui_ModerateRegionHeightFraction);
+                    ImGui.SliderFloat("Elev Inf", ref imgui_ElevationInfluence, 0.0f, 1.0f);
                     //ImGui.InputFloat("Water Cooling", ref imgui_waterCoolingFactor);
                     //ImGui.InputFloat("Water Temp", ref imgui_waterTemperature);
                     //ImGui.InputFloat("Lapse Rate", ref imgui_lapseRate);
@@ -297,6 +299,7 @@ namespace MGDFClone.Screens {
             worldTemperatureParametersV2.MinimumExtremeTemperature = imgui_MinimumExtremeTemperature;
             worldTemperatureParametersV2.MaximumExtremeTemperature = imgui_MaximumExtremeTemperature;
             worldTemperatureParametersV2.ModerateRegionHeightFraction = imgui_ModerateRegionHeightFraction;
+            worldTemperatureParametersV2.ElevationInfluence = imgui_ElevationInfluence;
 
             climateParameters.MountainThreshold = imgui_mountainThreshold;
             climateParameters.PercipitationFactor = imgui_percipitationFactor;

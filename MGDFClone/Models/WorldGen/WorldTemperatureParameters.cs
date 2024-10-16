@@ -7,13 +7,15 @@ namespace MGDFClone.Models {
         public float MinimumExtremeTemperature { get; set; }
         public float MaximumExtremeTemperature { get; set; }
         public float ModerateRegionHeightFraction { get; set; }
+        public float ElevationInfluence { get; set; }
 
         public static WorldTemperatureParametersV2 Default = new WorldTemperatureParametersV2 {
             MinimumModerateTemperature = 60.0f,
             MaximumModerateTemperature = 90.0f,
             MinimumExtremeTemperature = -20.0f,
             MaximumExtremeTemperature = 110.0f,
-            ModerateRegionHeightFraction = 0.50f
+            ModerateRegionHeightFraction = 0.50f,
+            ElevationInfluence = 0.2f
         };
     }
 

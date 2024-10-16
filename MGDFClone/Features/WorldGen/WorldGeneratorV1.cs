@@ -140,10 +140,18 @@ public class WorldGeneratorV1 {
         //float seasonalOffset = SeasonalTemperatureOffsets[m_WorlGenerationParameters.WorldTemperatureParameters.Season];
         float[] temperatureRows = _calculateBaseTemperature(WorldMap.Height, worldTemperatureParameters.MinimumModerateTemperature, worldTemperatureParameters.MaximumModerateTemperature,
             worldTemperatureParameters.MinimumExtremeTemperature, worldTemperatureParameters.MaximumExtremeTemperature, worldTemperatureParameters.ModerateRegionHeightFraction);
-
+        float elevationInfluence = worldTemperatureParameters.ElevationInfluence;
         for (int i = 0; i < WorldMap.Width * WorldMap.Height; i++) {
             int row = i / WorldMap.Height;
             temperatureMap[i] = temperatureRows[row];
+        }
+        for (int i = 0; i < WorldMap.Width * WorldMap.Width; i++) {
+            int row = i / WorldMap.Height;
+            int col = i % WorldMap.Height;
+            float elevation = WorldMap.RegionTiles[i].Elevation;
+            float currentTemperature = temperatureMap[i];
+            float adjustedTemperature = currentTemperature * (1 - (elevation * elevationInfluence));
+            temperatureMap[i] = adjustedTemperature;
         }
 
         WorldMap.SetTemperature(temperatureMap);
