@@ -133,7 +133,7 @@ public class WorldGeneratorV1 {
         //Log.Logger.Information($"Min Temp: {temperatureMap.Min()}");
         WorldMap.SetTemperature(temperatureMap);
     }
-    //TOD: Update this to use CosineWaveScreen's CalculateBaseTemperature method - keep in mind this only returns temperatures for the given "row"
+
     private void _applyTemperatureV2() {
         WorldTemperatureParametersV2 worldTemperatureParameters = m_WorlGenerationParameters.WorldTemperatureParametersV2;
         float[] temperatureMap = new float[WorldMap.Width * WorldMap.Height];
@@ -368,6 +368,7 @@ public class RegionTile1 {
     public float InitHumidy;
     public float Vegitation;
     public eBiome Biome;
+    public eRace? Civilization;
 }
 
 public enum ePolarRegion {

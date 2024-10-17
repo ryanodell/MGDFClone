@@ -20,6 +20,7 @@ namespace MGDFClone.Screens {
         private World _world;
         private Camera2D _camera;
         WorldGeneratorV1 _worldGenerator;
+        CivilizationManagerV1 _civilizationManager;
         private ImGuiRenderer m_ImGui = MainGame.ImGui;
         private RenderTarget2D m_OverworldRenderTarget;
         private bool m_ShowTemperaturemap = false;
@@ -37,12 +38,15 @@ namespace MGDFClone.Screens {
                 ClimateParameters = ClimateParameters.Default,
                 WorldTemperatureParametersV2 = WorldTemperatureParametersV2.Default
             });
+            
         }
 
         public override void LoadContent() {
             m_OverworldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
             if (_worldGenerator != null && _worldGenerator.WorldMap != null) {
                 _worldGenerator.GenerateWorld();
+                _civilizationManager = new CivilizationManagerV1(_worldGenerator.WorldMap.RegionTiles);
+                _civilizationManager.GenerateCivilizations();
             }
         }
 
@@ -65,28 +69,40 @@ namespace MGDFClone.Screens {
                     int row = i / data.Width;
                     int column = i % data.Width;
                     RegionTile1 regionTile = data.RegionTiles[i];
-                    eBiome biome = regionTile.Biome;
-                    float vegitation = regionTile.Vegitation;
-                    if(vegitation > 0.50f && regionTile.Elevation > _worldGenerator.WorldGenerationParameters.ElevationParameters.WaterElevation 
-                            && regionTile.Elevation < _worldGenerator.WorldGenerationParameters.ElevationParameters.WaterElevation 
-                                + _worldGenerator.WorldGenerationParameters.ElevationParameters.WaterToSandOffset + _worldGenerator.WorldGenerationParameters.ElevationParameters.SandToGrassOffet
-                                    + _worldGenerator.WorldGenerationParameters.ElevationParameters.GrassToHillOffset) {
-                        eSprite sprite = BiomeManagerV1.GetSpriteForBiome(biome);
-                        Color color = Color.Green;
-                        if (regionTile.Temperature < 10.0f) {
-                            color = Color.White;
+                    if (regionTile.Civilization != null) {
+                        if(regionTile.Civilization == eRace.Human) {
+                            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(eSprite.House), 
+                                Color.Brown, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                         }
-                        _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                        if(regionTile.Civilization == eRace.Dwarf) {
+                            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(eSprite.TableOrnament),
+                                Color.Gray, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                        }
+                        //_spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
                     } else {
-                        eSprite sprite = eSprite.None;
-                        Color color = Color.White;
-                        var tileType = _worldGenerator.DetermineTerrainTile(data.RegionTiles[i].Elevation);
-                        TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
-                        if(regionTile.Temperature < 0.0f) {
-                            color = Color.White;
-                        }
-                        _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
 
+                        eBiome biome = regionTile.Biome;
+                        float vegitation = regionTile.Vegitation;
+                        if (vegitation > 0.50f && regionTile.Elevation > _worldGenerator.WorldGenerationParameters.ElevationParameters.WaterElevation
+                                && regionTile.Elevation < _worldGenerator.WorldGenerationParameters.ElevationParameters.WaterElevation
+                                    + _worldGenerator.WorldGenerationParameters.ElevationParameters.WaterToSandOffset + _worldGenerator.WorldGenerationParameters.ElevationParameters.SandToGrassOffet
+                                        + _worldGenerator.WorldGenerationParameters.ElevationParameters.GrassToHillOffset) {
+                            eSprite sprite = BiomeManagerV1.GetSpriteForBiome(biome);
+                            Color color = Color.Green;
+                            if (regionTile.Temperature < 10.0f) {
+                                color = Color.White;
+                            }
+                            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                        } else {
+                            eSprite sprite = eSprite.None;
+                            Color color = Color.White;
+                            var tileType = _worldGenerator.DetermineTerrainTile(data.RegionTiles[i].Elevation);
+                            TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
+                            if (regionTile.Temperature < 0.0f) {
+                                color = Color.White;
+                            }
+                            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+                        }
                     }
                 };
                 if (m_ShowTemperaturemap) {
