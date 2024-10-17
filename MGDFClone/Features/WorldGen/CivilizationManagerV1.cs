@@ -32,9 +32,9 @@ public class CivilizationManagerV1 {
         if (regionTile.Temperature >= racePreference.MinTemperature && regionTile.Temperature <= racePreference.MaxTemperature) {
             score += 10.0f;
         }
-        if (regionTile.Humidity >= racePreference.MinHumidity && regionTile.Humidity <= racePreference.MaxHumidity) {
-            score += 10.0f;
-        }
+        //if (regionTile.Humidity >= racePreference.MinHumidity && regionTile.Humidity <= racePreference.MaxHumidity) {
+        //    score += 10.0f;
+        //}
         return score;
     }
 
@@ -47,15 +47,15 @@ public class CivilizationManagerV1 {
             var regionTile = m_RegionTiles[i];
             float dwarfScore = _evaluateLocationForRace(regionTile, dwarfPreference);
             float humanScore = _evaluateLocationForRace(regionTile, humanPreference);
-            if (dwarfScore > 90) {
+            if (dwarfScore > 0) {
                 var chance = _random.Next(100);
                 if (chance >= 90) {
                     regionTile.Civilization = eRace.Dwarf;
                 }
             }
-            if (humanScore > 90) {
+            if (humanScore > 0) {
                 var chance = _random.Next(100);
-                if (chance >= 75) {
+                if (chance >= 90) {
                     regionTile.Civilization = eRace.Human;
                 }
             }
