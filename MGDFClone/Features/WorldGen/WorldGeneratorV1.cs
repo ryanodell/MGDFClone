@@ -307,9 +307,11 @@ public class WorldMap1 {
     private float[] m_vegationMap;
     private eWorldSize m_worldSize;
     private RegionTile1[] m_regionTiles;
+    private WorldTile1[] m_WorldTiles;
     public int Width => m_width;
     public int Height => m_height;
     public RegionTile1[] RegionTiles => m_regionTiles;
+    public WorldTile1[] WorldTiles => m_WorldTiles;
     public WorldMap1(eWorldSize worldSize) {
         m_width = (int)worldSize;
         m_height = (int)worldSize;
@@ -320,6 +322,36 @@ public class WorldMap1 {
         for (int i = 0; i < m_regionTiles.Length; i++) {
             m_regionTiles[i] = new();
         }
+        int worldTileWidth = m_width / 16;
+        int worldTileHeight = m_height / 16;
+        m_WorldTiles = new WorldTile1[worldTileWidth * worldTileHeight];
+        _populateWorldTiles(worldTileWidth, worldTileHeight);
+    }
+
+    private void _populateWorldTiles(int worldTileWidth, int worldTileHeight) {
+        for(int worldY = 0; worldY < worldTileHeight; worldY++) {
+            for(int worldX = 0; worldX < worldTileWidth; worldX++) {
+                RegionTile1[] regionChunk = _getRegionTilesChunk(worldX, worldY);
+            }
+        }
+    }
+    private RegionTile1[] _getRegionTilesChunk(int worldTileX, int worldTileY) {
+        // Create an array for the 16x16 region tiles
+        RegionTile1[] chunk = new RegionTile1[16 * 16];
+
+        // Calculate the starting position of the chunk in the region tile array
+        int startX = worldTileX * 16;
+        int startY = worldTileY * 16;
+
+        // Populate the chunk by copying from the region tile array
+        for (int y = 0; y < 16; y++) {
+            for (int x = 0; x < 16; x++) {
+                int regionTileIndex = (startY + y) * m_width + (startX + x);
+                chunk[y * 16 + x] = m_regionTiles[regionTileIndex];
+            }
+        }
+
+        return chunk;
     }
 
     public void SetElevation(float[] elevationMap) {
