@@ -353,8 +353,22 @@ public class WorldMap1 {
     }
 }
 
-public class WorldMapTile1 {
+public class WorldTile1 {
+    public RegionTile1[] RegionTiles { get; private set; }
+    public float AverageElevation { get; private set; }
+    public float AverageTemperature { get; private set; }
+    public float AverageHumidity { get; private set; }
 
+    public WorldTile1(RegionTile1[] regionTiles) {
+        RegionTiles = regionTiles;
+        CalculateAverages();
+    }
+
+    public void CalculateAverages() {
+        AverageElevation = RegionTiles.Average(t => t.Elevation);
+        AverageTemperature = RegionTiles.Average(t => t.Temperature);
+        AverageHumidity = RegionTiles.Average(t => t.Humidity);        
+    }
 }
 
 public class LocalTile1 {
