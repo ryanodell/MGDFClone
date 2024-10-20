@@ -332,6 +332,8 @@ public class WorldMap1 {
         for(int worldY = 0; worldY < worldTileHeight; worldY++) {
             for(int worldX = 0; worldX < worldTileWidth; worldX++) {
                 RegionTile1[] regionChunk = _getRegionTilesChunk(worldX, worldY);
+                int worldTileIndex = worldY * worldTileWidth + worldX;
+                m_WorldTiles[worldTileIndex] = new WorldTile1(regionChunk);
             }
         }
     }

@@ -5,12 +5,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace MGDFClone.Screens;
-
-public class WorldTile {
-    public RegionTile1[] RegionTiles;
-
-}
-
 public class WorldInspectorScreen : ScreenBase {
     private Camera2D m_WorldCamera, m_RegionCamera, m_InformationCamera;
     private RenderTarget2D m_WorldRenderTarget, m_RegionRenderTarget, m_InformationTarget;
@@ -18,7 +12,6 @@ public class WorldInspectorScreen : ScreenBase {
     private WorldGeneratorV1 _worldGenerator;
     private RegionTile1[] m_RegionTiles;
     int sectionWidth;
-    private WorldTile[] m_WorlTiles;
     public WorldInspectorScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         m_WorldCamera = new Camera2D(_graphics.GraphicsDevice);
         m_RegionCamera = new Camera2D(_graphics.GraphicsDevice);
