@@ -325,20 +325,51 @@ public class WorldMap1 {
         int worldTileWidth = (int)Math.Ceiling((double)m_width / Globals.REGION_CHUNK_SIZE);
         int worldTileHeight = (int)Math.Ceiling((double)m_height / Globals.REGION_CHUNK_SIZE);
         m_WorldTiles = new WorldTile1[worldTileWidth * worldTileHeight];
-        //Small world is 4225 region tiles.
-        //_populateWorldTiles(worldTileWidth, worldTileHeight);
-        
+        _populateWorldTiles(worldTileWidth, worldTileHeight);
     }
 
     private void _populateWorldTiles(int worldTileWidth, int worldTileHeight) {
-        for(int worldY = 0; worldY < worldTileHeight; worldY++) {
-            for(int worldX = 0; worldX < worldTileWidth; worldX++) {
-                RegionTile1[] regionChunk = _getRegionTilesChunk(worldX, worldY);
-                int worldTileIndex = worldY * worldTileWidth + worldX;
-                m_WorldTiles[worldTileIndex] = new WorldTile1(regionChunk);
+        for (int y = 0; y < worldTileHeight; y++) {
+            for (int x = 0; x < worldTileWidth; x++) {
+                // Calculate the startX and startY for the current world tile
+                int startX = x * Globals.REGION_CHUNK_SIZE;
+                int startY = y * Globals.REGION_CHUNK_SIZE;
+
+                // Get the 16x16 region tiles for this world tile, now with bounds checking
+                RegionTile1[] chunk = _getChunk(startX, startY, m_width, m_height);
+
+                // Create a new WorldTile1 using the chunk
+                WorldTile1 worldTile = new WorldTile1(chunk);
+
+                // Store the world tile in the array
+                m_WorldTiles[y * worldTileWidth + x] = worldTile;
             }
         }
     }
+
+    private RegionTile1[] _getChunk(int startX, int startY, int worldWidth, int worldHeight) {
+        RegionTile1[] block = new RegionTile1[Globals.REGION_CHUNK_SIZE * Globals.REGION_CHUNK_SIZE];
+
+        for (int y = 0; y < Globals.REGION_CHUNK_SIZE; y++) {
+            for (int x = 0; x < Globals.REGION_CHUNK_SIZE; x++) {
+                int worldX = startX + x;
+                int worldY = startY + y;
+
+                // Check if we're still within the bounds of the region tiles
+                if (worldX < worldWidth && worldY < worldHeight) {
+                    int worldIndex = worldY * worldWidth + worldX;
+                    int blockIndex = y * Globals.REGION_CHUNK_SIZE + x;
+                    block[blockIndex] = m_regionTiles[worldIndex];
+                } else {
+                    // Handle out-of-bounds by assigning a default RegionTile1 (e.g., empty tile)
+                    block[y * Globals.REGION_CHUNK_SIZE + x] = new RegionTile1(); // Or null if you prefer
+                }
+            }
+        }
+
+        return block;
+    }
+
 
     private RegionTile1[] _getRegionTilesChunk(int worldTileX, int worldTileY) {
         // Create an array for the 16x16 region tiles
