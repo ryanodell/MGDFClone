@@ -322,8 +322,8 @@ public class WorldMap1 {
         for (int i = 0; i < m_regionTiles.Length; i++) {
             m_regionTiles[i] = new();
         }
-        int worldTileWidth = (int)Math.Ceiling((double)m_width / 16);
-        int worldTileHeight = (int)Math.Ceiling((double)m_height / 16);
+        int worldTileWidth = (int)Math.Ceiling((double)m_width / Globals.REGION_CHUNK_SIZE);
+        int worldTileHeight = (int)Math.Ceiling((double)m_height / Globals.REGION_CHUNK_SIZE);
         m_WorldTiles = new WorldTile1[worldTileWidth * worldTileHeight];
         //Small world is 4225 region tiles.
         //_populateWorldTiles(worldTileWidth, worldTileHeight);
