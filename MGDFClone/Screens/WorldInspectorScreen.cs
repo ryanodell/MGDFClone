@@ -15,6 +15,7 @@ public class WorldInspectorScreen : ScreenBase {
     private WorldGeneratorV1 _worldGenerator;
     private RegionTile1[] m_RegionTiles;
     int sectionWidth;
+    private WorldTile1 m_SelectedWorldTile;
     public WorldInspectorScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         m_WorldCamera = new Camera2D(_graphics.GraphicsDevice);
         m_RegionCamera = new Camera2D(_graphics.GraphicsDevice);
@@ -46,10 +47,11 @@ public class WorldInspectorScreen : ScreenBase {
         m_InformationTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
         
         m_WorldViewport = new Viewport(0, 0, sectionWidth, _graphics.PreferredBackBufferHeight);
-        m_RegionViewport = new Viewport(0, sectionWidth, sectionWidth, _graphics.PreferredBackBufferHeight);
+        m_RegionViewport = new Viewport(0, 0, sectionWidth, _graphics.PreferredBackBufferHeight / 2);
         m_InformationViewport = new Viewport(0, sectionWidth * 2, sectionWidth, _graphics.PreferredBackBufferHeight);
         _worldGenerator.GenerateWorld();
         m_RegionTiles = _worldGenerator.WorldMap.RegionTiles;
+        m_SelectedWorldTile = _worldGenerator.WorldMap.WorldTiles[0];
     }
 
     public override void UnloadContent() {
@@ -66,8 +68,18 @@ public class WorldInspectorScreen : ScreenBase {
         _graphics.GraphicsDevice.SetRenderTarget(m_WorldRenderTarget);
         //_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, m_WorldCamera.GetViewMatrix());
         _spriteBatch.Begin();
-        //_graphics.GraphicsDevice.Viewport = m_WorldViewport;
-        _spriteBatch.Draw(Globals.TEXTURE, Vector2.Zero, new Rectangle(0, 0, Globals.TILE_SIZE * 20, Globals.TILE_SIZE * 20), Color.White);
+        _graphics.GraphicsDevice.Viewport = m_WorldViewport;
+        for(int i = 0; i < m_SelectedWorldTile.RegionTiles.Length; i++) {
+            RegionTile1 worldTile = m_SelectedWorldTile.RegionTiles[i];
+            int col = i % _worldGenerator.WorldMap.Width;
+            int row = i / _worldGenerator.WorldMap.Width;
+            eSprite sprite = eSprite.None;
+            Color color = Color.White;
+            var tileType = _worldGenerator.DetermineTerrainTile(worldTile.Elevation);
+            TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
+            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(col * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+
+        }
         _graphics.GraphicsDevice.Clear(Color.Black);
         _spriteBatch.End();
 
@@ -75,7 +87,7 @@ public class WorldInspectorScreen : ScreenBase {
         _graphics.GraphicsDevice.SetRenderTarget(m_RegionRenderTarget);
         //_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, m_RegionCamera.GetViewMatrix());        
         _spriteBatch.Begin();
-        //_graphics.GraphicsDevice.Viewport = m_RegionViewport;
+        _graphics.GraphicsDevice.Viewport = m_RegionViewport;
         for (int i = 0; i < _worldGenerator.WorldMap.WorldTiles.Length; i++) {
             WorldTile1 worldTile = _worldGenerator.WorldMap.WorldTiles[i];
             int col = i % _worldGenerator.WorldMap.WorldWidth;
@@ -99,7 +111,7 @@ public class WorldInspectorScreen : ScreenBase {
 
         _spriteBatch.Begin();
         _spriteBatch.Draw(m_WorldRenderTarget, new Vector2(0, 0), Color.White);
-        _spriteBatch.Draw(m_RegionRenderTarget, new Vector2(sectionWidth, 0), Color.White);
+        _spriteBatch.Draw(m_RegionRenderTarget, new Vector2(sectionWidth + Globals.TILE_SIZE * 2, 0), Color.White);
         //_spriteBatch.Draw(m_InformationTarget, new Rectangle(500, 0, 250, _graphics.PreferredBackBufferHeight), Color.White);
         _spriteBatch.End();
 
