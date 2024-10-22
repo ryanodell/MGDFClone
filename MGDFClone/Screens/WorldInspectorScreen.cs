@@ -69,7 +69,7 @@ public class WorldInspectorScreen : ScreenBase {
         if(_inputManager.JustReleased(Keys.D)) {
             m_SelectedColumn++;
             int index = _getIndex(m_SelectedColumn, m_SelectedRow);
-            if(index > _worldGenerator.WorldMap.WorldWidth) {
+            if(index > _worldGenerator.WorldMap.WorldTiles.Length) {
                 m_SelectedColumn--;
                 return;
             }
