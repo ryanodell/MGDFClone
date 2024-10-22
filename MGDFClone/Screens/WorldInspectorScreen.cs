@@ -5,7 +5,7 @@ using MGDFClone.Managers;
 using MGDFClone.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.Xna.Framework.Input;
 
 namespace MGDFClone.Screens;
 public class WorldInspectorScreen : ScreenBase {
@@ -16,6 +16,8 @@ public class WorldInspectorScreen : ScreenBase {
     private RegionTile1[] m_RegionTiles;
     int sectionWidth;
     private WorldTile1 m_SelectedWorldTile;
+    private int m_SelectedRow = 0;
+    private int m_SelectedColumn = 0;
     public WorldInspectorScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         m_WorldCamera = new Camera2D(_graphics.GraphicsDevice);
         m_RegionCamera = new Camera2D(_graphics.GraphicsDevice);
@@ -35,6 +37,10 @@ public class WorldInspectorScreen : ScreenBase {
         });
     }
 
+    private int _getIndex(int column, int row) {
+        return (row * _worldGenerator.WorldMap.WorldWidth) + column;
+    }
+
     private void _drawWorldTile(RegionTile1[] tiles) {
 
     }
@@ -51,7 +57,8 @@ public class WorldInspectorScreen : ScreenBase {
         m_InformationViewport = new Viewport(0, sectionWidth * 2, sectionWidth, _graphics.PreferredBackBufferHeight);
         _worldGenerator.GenerateWorld();
         m_RegionTiles = _worldGenerator.WorldMap.RegionTiles;
-        m_SelectedWorldTile = _worldGenerator.WorldMap.WorldTiles[0];
+        int index = _getIndex(m_SelectedColumn, m_SelectedRow);
+        m_SelectedWorldTile = _worldGenerator.WorldMap.WorldTiles[index];
     }
 
     public override void UnloadContent() {
@@ -59,7 +66,43 @@ public class WorldInspectorScreen : ScreenBase {
     }
 
     public override void Update(GameTime gameTime) {
-        
+        if(_inputManager.JustReleased(Keys.D)) {
+            m_SelectedColumn++;
+            int index = _getIndex(m_SelectedColumn, m_SelectedRow);
+            if(index > _worldGenerator.WorldMap.WorldWidth) {
+                m_SelectedColumn--;
+                return;
+            }
+            m_SelectedWorldTile = _worldGenerator.WorldMap.WorldTiles[index];
+        }
+        if (_inputManager.JustReleased(Keys.A)) {
+            m_SelectedColumn--;
+            int index = _getIndex(m_SelectedColumn, m_SelectedRow);
+            if (index < 0) {
+                m_SelectedColumn++;
+                return;
+            }
+            m_SelectedWorldTile = _worldGenerator.WorldMap.WorldTiles[index];
+        }
+
+        if (_inputManager.JustReleased(Keys.W)) {
+            m_SelectedRow--;
+            int index = _getIndex(m_SelectedColumn, m_SelectedRow);
+            if (index < 0) {
+                m_SelectedRow++;
+                return;
+            }
+            m_SelectedWorldTile = _worldGenerator.WorldMap.WorldTiles[index];
+        }
+        if (_inputManager.JustReleased(Keys.S)) {
+            m_SelectedRow++;
+            int index = _getIndex(m_SelectedColumn, m_SelectedRow);
+            if (index > _worldGenerator.WorldMap.WorldTiles.Length) {
+                m_SelectedRow--;
+                return;
+            }
+            m_SelectedWorldTile = _worldGenerator.WorldMap.WorldTiles[index];
+        }
     }
 
     public override void Draw(GameTime gameTime) {
@@ -79,7 +122,7 @@ public class WorldInspectorScreen : ScreenBase {
             TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
             _spriteBatch.Draw(Globals.TEXTURE, new Vector2(col * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
 
-        }
+        }        
         _graphics.GraphicsDevice.Clear(Color.Black);
         _spriteBatch.End();
 
@@ -98,6 +141,7 @@ public class WorldInspectorScreen : ScreenBase {
             TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
             _spriteBatch.Draw(Globals.TEXTURE, new Vector2(col * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
         }
+        _spriteBatch.Draw(Globals.TEXTURE, new Vector2(m_SelectedColumn * Globals.TILE_SIZE, m_SelectedRow * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(eSprite.CapitalX), Color.Yellow, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
         _graphics.GraphicsDevice.Clear(Color.Black);
         _spriteBatch.End();
 
