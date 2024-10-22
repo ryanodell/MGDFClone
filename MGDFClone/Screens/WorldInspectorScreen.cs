@@ -1,8 +1,11 @@
 ﻿using MGDFClone.Core;
+using MGDFClone.Features.MapGen;
 using MGDFClone.Features.WorldGen;
+using MGDFClone.Managers;
 using MGDFClone.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MGDFClone.Screens;
 public class WorldInspectorScreen : ScreenBase {
@@ -70,10 +73,19 @@ public class WorldInspectorScreen : ScreenBase {
 
 
         _graphics.GraphicsDevice.SetRenderTarget(m_RegionRenderTarget);
-        //_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, m_RegionCamera.GetViewMatrix());
+        //_spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, null, null, null, m_RegionCamera.GetViewMatrix());        
         _spriteBatch.Begin();
         //_graphics.GraphicsDevice.Viewport = m_RegionViewport;
-        _spriteBatch.Draw(Globals.TEXTURE, Vector2.Zero, new Rectangle(10 * Globals.TILE_SIZE, 0, Globals.TILE_SIZE, Globals.TILE_SIZE), Color.Red);
+        for (int i = 0; i < _worldGenerator.WorldMap.WorldTiles.Length; i++) {
+            WorldTile1 worldTile = _worldGenerator.WorldMap.WorldTiles[i];
+            int col = i % _worldGenerator.WorldMap.WorldWidth;
+            int row = i / _worldGenerator.WorldMap.WorldWidth;
+            eSprite sprite = eSprite.None;
+            Color color = Color.White;
+            var tileType = _worldGenerator.DetermineTerrainTile(worldTile.AverageElevation);
+            TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
+            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(col * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
+        }
         _graphics.GraphicsDevice.Clear(Color.Black);
         _spriteBatch.End();
 

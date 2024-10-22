@@ -312,6 +312,9 @@ public class WorldMap1 {
     public int Height => m_height;
     public RegionTile1[] RegionTiles => m_regionTiles;
     public WorldTile1[] WorldTiles => m_WorldTiles;
+
+    public int WorldWidth;
+    public int WorldHeight;
     public WorldMap1(eWorldSize worldSize) {
         m_width = (int)worldSize;
         m_height = (int)worldSize;
@@ -324,6 +327,8 @@ public class WorldMap1 {
         }
         int worldTileWidth = (int)Math.Ceiling((double)m_width / Globals.REGION_CHUNK_SIZE);
         int worldTileHeight = (int)Math.Ceiling((double)m_height / Globals.REGION_CHUNK_SIZE);
+        WorldWidth = worldTileWidth;
+        WorldHeight = worldTileHeight;
         m_WorldTiles = new WorldTile1[worldTileWidth * worldTileHeight];
         _populateWorldTiles(worldTileWidth, worldTileHeight);
     }
@@ -394,6 +399,9 @@ public class WorldMap1 {
         for (int i = 0; i < m_regionTiles.Length; i++) {
             m_regionTiles[i].Elevation = elevationMap[i];
         }
+        for(int i = 0; i < m_WorldTiles.Length; i++) {
+            m_WorldTiles[i].CalculateAverages();
+        }
     }
 
     public void SetTemperature(float[] temperatureMap) {
@@ -429,7 +437,6 @@ public class WorldTile1 {
 
     public WorldTile1(RegionTile1[] regionTiles) {
         RegionTiles = regionTiles;
-        CalculateAverages();
     }
 
     public void CalculateAverages() {
