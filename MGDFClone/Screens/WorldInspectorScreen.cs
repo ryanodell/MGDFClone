@@ -71,8 +71,8 @@ public class WorldInspectorScreen : ScreenBase {
         _graphics.GraphicsDevice.Viewport = m_WorldViewport;
         for(int i = 0; i < m_SelectedWorldTile.RegionTiles.Length; i++) {
             RegionTile1 worldTile = m_SelectedWorldTile.RegionTiles[i];
-            int col = i % _worldGenerator.WorldMap.Width;
-            int row = i / _worldGenerator.WorldMap.Width;
+            int col = i % Globals.REGION_CHUNK_SIZE;
+            int row = i / Globals.REGION_CHUNK_SIZE;
             eSprite sprite = eSprite.None;
             Color color = Color.White;
             var tileType = _worldGenerator.DetermineTerrainTile(worldTile.Elevation);
