@@ -52,11 +52,14 @@ public class WorldInspectorScreen : ScreenBase {
     public override void LoadContent() {
         sectionWidth = _graphics.PreferredBackBufferWidth / 3;
         //m_WorldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-        m_WorldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, sectionWidth, _graphics.PreferredBackBufferHeight);
+        //m_WorldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, sectionWidth, _graphics.PreferredBackBufferHeight);
+        //m_WorldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, Globals.TILE_SIZE * Globals.REGION_CHUNK_SIZE, _graphics.PreferredBackBufferHeight);
+        m_WorldRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
         m_RegionRenderTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
         m_InformationTarget = new RenderTarget2D(_graphics.GraphicsDevice, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
 
-        m_WorldViewport = new Viewport(0, 0, sectionWidth, _graphics.PreferredBackBufferHeight);
+        //m_WorldViewport = new Viewport(0, 0, sectionWidth, _graphics.PreferredBackBufferHeight);
+        m_WorldViewport = new Viewport(0, 0, Globals.TILE_SIZE * Globals.REGION_CHUNK_SIZE + 1, _graphics.PreferredBackBufferHeight);
         m_RegionViewport = new Viewport(0, 0, sectionWidth, _graphics.PreferredBackBufferHeight / 2);
         m_InformationViewport = new Viewport(0, sectionWidth * 2, sectionWidth, _graphics.PreferredBackBufferHeight);
         _worldGenerator.GenerateWorld();
@@ -130,7 +133,7 @@ public class WorldInspectorScreen : ScreenBase {
                 var tileType = _worldGenerator.DetermineTerrainTile(data.RegionTiles[i].Elevation);
                 TileTypeHelper.SetSpriteData(ref sprite, ref color, tileType);
                 _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
-            }
+            }            
             _spriteBatch.End();
 
         } else {
@@ -181,7 +184,7 @@ public class WorldInspectorScreen : ScreenBase {
 
             _spriteBatch.Begin();
             _spriteBatch.Draw(m_WorldRenderTarget, new Vector2(0, 0), Color.White);
-            _spriteBatch.Draw(m_RegionRenderTarget, new Vector2(sectionWidth + Globals.TILE_SIZE * 2, 0), Color.White);
+            _spriteBatch.Draw(m_RegionRenderTarget, new Vector2(sectionWidth + Globals.TILE_SIZE * 4, 0), Color.White);
             //_spriteBatch.Draw(m_InformationTarget, new Rectangle(500, 0, 250, _graphics.PreferredBackBufferHeight), Color.White);
             _spriteBatch.End();
 
