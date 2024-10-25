@@ -6,13 +6,18 @@ using MGDFClone.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Data.Common;
 
 namespace MGDFClone.Screens;
 public class RegionTileGenerationScreen : ScreenBase {
     private WorldGeneratorV1 m_WorldGenerator;
     private Camera2D m_Camera;
     private float m_CamSpeed = 8.0f;
+    private (int Column, int Row) m_SelectedTile = (0, 0);
+    private int m_SelectedColSize = 1;
+    private int m_SelectedRowSize = 1;
+    private const float m_BlinkTime = 500;
+    private float m_CurrentBlinkTimer = m_BlinkTime;
+    private bool m_SelectorVisible = true;
     public RegionTileGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         m_Camera = new Camera2D(_graphics.GraphicsDevice);
         m_Camera.Zoom = 1.0f;
@@ -38,6 +43,11 @@ public class RegionTileGenerationScreen : ScreenBase {
         m_WorldGenerator.ApplyTemperature();
         m_WorldGenerator.ApplyHumidity();
         m_WorldGenerator.ApplyVegitation();
+        m_CurrentBlinkTimer -= (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+        if (m_CurrentBlinkTimer < 0) {
+            m_CurrentBlinkTimer = m_BlinkTime;
+            m_SelectorVisible = !m_SelectorVisible;
+        }
     }
 
     public override void Draw(GameTime gameTime) {
@@ -70,6 +80,10 @@ public class RegionTileGenerationScreen : ScreenBase {
                 }
                 _spriteBatch.Draw(Globals.TEXTURE, new Vector2(column * Globals.TILE_SIZE, row * Globals.TILE_SIZE), SpriteSheetManager.GetSourceRectForSprite(sprite), color, 0.0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 1.0f);
             }
+        }
+        if (m_SelectorVisible) {
+            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(m_SelectedTile.Column * Globals.TILE_SIZE, m_SelectedTile.Row * Globals.TILE_SIZE), 
+                SpriteSheetManager.GetSourceRectForSprite(eSprite.CapitalX), Color.Yellow);
         }
         _spriteBatch.End();
     }
