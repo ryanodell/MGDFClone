@@ -6,6 +6,8 @@ using MGDFClone.Models;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Serilog;
+using Serilog.Core;
 
 namespace MGDFClone.Screens;
 public class RegionTileGenerationScreen : ScreenBase {
@@ -18,7 +20,8 @@ public class RegionTileGenerationScreen : ScreenBase {
     private const float m_BlinkTime = 500;
     private float m_CurrentBlinkTimer = m_BlinkTime;
     private bool m_SelectorVisible = true;
-    private Vector2 m_SelectorPosition => new Vector2(m_SelectedTile.Column * Globals.TILE_SIZE, m_SelectedTile.Row* Globals.TILE_SIZE);
+    private int m_ShiftModifier = 8;
+    private Vector2 m_SelectorPosition => new Vector2(m_SelectedTile.Column * Globals.TILE_SIZE, m_SelectedTile.Row * Globals.TILE_SIZE);
     public RegionTileGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         m_Camera = new Camera2D(_graphics.GraphicsDevice);
         m_Camera.Zoom = 1.0f;
@@ -91,77 +94,76 @@ public class RegionTileGenerationScreen : ScreenBase {
     }
 
     private void _handleSelector() {
+        bool isSheftHeld = _inputManager.IsPressed(Keys.LeftShift) || _inputManager.IsPressed(Keys.RightShift);
         if (_inputManager.JustReleased(Keys.D) || _inputManager.JustReleased(Keys.NumPad6)) {
-            m_SelectedTile.Column++;
+            if (isSheftHeld) {
+                m_SelectedTile.Column += m_ShiftModifier;
+            } else {
+                m_SelectedTile.Column++;
+            }
         }
         if (_inputManager.JustReleased(Keys.A) || _inputManager.JustReleased(Keys.NumPad4)) {
-            m_SelectedTile.Column--;
+            if (isSheftHeld) {
+                m_SelectedTile.Column -= m_ShiftModifier;
+            } else {
+                m_SelectedTile.Column--;
+            }
         }
         if (_inputManager.JustReleased(Keys.NumPad7)) {
-            m_SelectedTile.Column--;
-            m_SelectedTile.Row--;
+            if (isSheftHeld) {
+                m_SelectedTile.Column -= m_ShiftModifier;
+                m_SelectedTile.Row -= m_ShiftModifier;
+            } else {
+                m_SelectedTile.Column--;
+                m_SelectedTile.Row--;
+            }
         }
         if (_inputManager.JustReleased(Keys.NumPad9)) {
-            m_SelectedTile.Column++;
-            m_SelectedTile.Row--;
+            if (isSheftHeld) {
+                m_SelectedTile.Column += m_ShiftModifier;
+                m_SelectedTile.Row -= m_ShiftModifier;
+            } else {
+                m_SelectedTile.Column++;
+                m_SelectedTile.Row--;
+            }
         }
         if (_inputManager.JustReleased(Keys.W) || _inputManager.JustReleased(Keys.NumPad8)) {
-            m_SelectedTile.Row--;
+            if (isSheftHeld) {
+                m_SelectedTile.Row -= m_ShiftModifier;
+            } else {
+                m_SelectedTile.Row--;
+            }
         }
         if (_inputManager.JustReleased(Keys.S) || _inputManager.JustReleased(Keys.NumPad2)) {
-            m_SelectedTile.Row++;
+            if (isSheftHeld) {
+                m_SelectedTile.Row += m_ShiftModifier;
+            } else {
+                m_SelectedTile.Row++;
+            }
         }
         if (_inputManager.JustReleased(Keys.NumPad1)) {
-            m_SelectedTile.Column--;
-            m_SelectedTile.Row++;
+            if (isSheftHeld) {
+                m_SelectedTile.Column -= m_ShiftModifier;
+                m_SelectedTile.Row += m_ShiftModifier;
+            } else {
+                m_SelectedTile.Column--;
+                m_SelectedTile.Row++;
+            }
         }
         if (_inputManager.JustReleased(Keys.NumPad3)) {
-            m_SelectedTile.Column++;
-            m_SelectedTile.Row++;
+            if (isSheftHeld) {
+                m_SelectedTile.Column += m_ShiftModifier;
+                m_SelectedTile.Row += m_ShiftModifier;
+            } else {
+                m_SelectedTile.Column++;
+                m_SelectedTile.Row++;
+            }
         }
         if (_inputManager.JustPressed(Keys.OemMinus) || _inputManager.JustPressed(Keys.Subtract) || _inputManager.GetMouseScroll() < 0) {
             m_Camera.Zoom -= 0.3f;
         }
         if (_inputManager.JustPressed(Keys.OemPlus) || _inputManager.JustPressed(Keys.Add) || _inputManager.GetMouseScroll() > 0) {
             m_Camera.Zoom += 0.3f;
-        }
-    }
-
-    private void _handleCameraMovement() {
-        if (_inputManager.IsHeld(Keys.D) || _inputManager.IsHeld(Keys.NumPad6)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X + m_CamSpeed, m_Camera.Position.Y);
-        }
-        if (_inputManager.IsHeld(Keys.A) || _inputManager.IsHeld(Keys.NumPad4)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X - m_CamSpeed, m_Camera.Position.Y);
-        }
-        if (_inputManager.IsHeld(Keys.NumPad7)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X - m_CamSpeed, m_Camera.Position.Y - m_CamSpeed);
-        }
-        if (_inputManager.IsHeld(Keys.NumPad9)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X + m_CamSpeed, m_Camera.Position.Y - m_CamSpeed);
-        }
-        if (_inputManager.IsHeld(Keys.W) || _inputManager.IsHeld(Keys.NumPad8)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X, m_Camera.Position.Y - m_CamSpeed);
-        }
-        if (_inputManager.IsHeld(Keys.S) || _inputManager.IsHeld(Keys.NumPad2)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X, m_Camera.Position.Y + m_CamSpeed);
-        }
-        if (_inputManager.IsHeld(Keys.NumPad1)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X - m_CamSpeed, m_Camera.Position.Y + m_CamSpeed);
-        }
-        if (_inputManager.IsHeld(Keys.NumPad3)) {
-            m_Camera.Position = new Vector2(m_Camera.Position.X + m_CamSpeed, m_Camera.Position.Y + m_CamSpeed);
-        }
-        if (_inputManager.JustPressed(Keys.OemMinus) || _inputManager.JustPressed(Keys.Subtract) || _inputManager.GetMouseScroll() < 0) {
-            m_Camera.Zoom -= 0.3f;
-        }
-        if (_inputManager.JustPressed(Keys.OemPlus) || _inputManager.JustPressed(Keys.Add) || _inputManager.GetMouseScroll() > 0) {
-            m_Camera.Zoom += 0.3f;
-        }
-        if (_inputManager.IsHeld(Keys.Space)) {
-            m_CamSpeed = 16.0f;
-        } else {
-            m_CamSpeed = 8.0f;
         }
     }
 }
