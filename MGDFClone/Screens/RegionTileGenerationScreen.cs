@@ -18,6 +18,7 @@ public class RegionTileGenerationScreen : ScreenBase {
     private const float m_BlinkTime = 500;
     private float m_CurrentBlinkTimer = m_BlinkTime;
     private bool m_SelectorVisible = true;
+    private Vector2 m_SelectorPosition => new Vector2(m_SelectedTile.Column * Globals.TILE_SIZE, m_SelectedTile.Row* Globals.TILE_SIZE);
     public RegionTileGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         m_Camera = new Camera2D(_graphics.GraphicsDevice);
         m_Camera.Zoom = 1.0f;
@@ -39,7 +40,9 @@ public class RegionTileGenerationScreen : ScreenBase {
     }
 
     public override void Update(GameTime gameTime) {
-        _handleCameraMovement();
+        //_handleCameraMovement();
+        _handleSelector();
+        m_Camera.LookAt(m_SelectorPosition);
         m_WorldGenerator.ApplyTemperature();
         m_WorldGenerator.ApplyHumidity();
         m_WorldGenerator.ApplyVegitation();
@@ -82,10 +85,46 @@ public class RegionTileGenerationScreen : ScreenBase {
             }
         }
         if (m_SelectorVisible) {
-            _spriteBatch.Draw(Globals.TEXTURE, new Vector2(m_SelectedTile.Column * Globals.TILE_SIZE, m_SelectedTile.Row * Globals.TILE_SIZE), 
-                SpriteSheetManager.GetSourceRectForSprite(eSprite.CapitalX), Color.Yellow);
+            _spriteBatch.Draw(Globals.TEXTURE, m_SelectorPosition, SpriteSheetManager.GetSourceRectForSprite(eSprite.CapitalX), Color.Yellow);
         }
         _spriteBatch.End();
+    }
+
+    private void _handleSelector() {
+        if (_inputManager.JustReleased(Keys.D) || _inputManager.JustReleased(Keys.NumPad6)) {
+            m_SelectedTile.Column++;
+        }
+        if (_inputManager.JustReleased(Keys.A) || _inputManager.JustReleased(Keys.NumPad4)) {
+            m_SelectedTile.Column--;
+        }
+        if (_inputManager.JustReleased(Keys.NumPad7)) {
+            m_SelectedTile.Column--;
+            m_SelectedTile.Row--;
+        }
+        if (_inputManager.JustReleased(Keys.NumPad9)) {
+            m_SelectedTile.Column++;
+            m_SelectedTile.Row--;
+        }
+        if (_inputManager.JustReleased(Keys.W) || _inputManager.JustReleased(Keys.NumPad8)) {
+            m_SelectedTile.Row--;
+        }
+        if (_inputManager.JustReleased(Keys.S) || _inputManager.JustReleased(Keys.NumPad2)) {
+            m_SelectedTile.Row++;
+        }
+        if (_inputManager.JustReleased(Keys.NumPad1)) {
+            m_SelectedTile.Column--;
+            m_SelectedTile.Row++;
+        }
+        if (_inputManager.JustReleased(Keys.NumPad3)) {
+            m_SelectedTile.Column++;
+            m_SelectedTile.Row++;
+        }
+        if (_inputManager.JustPressed(Keys.OemMinus) || _inputManager.JustPressed(Keys.Subtract) || _inputManager.GetMouseScroll() < 0) {
+            m_Camera.Zoom -= 0.3f;
+        }
+        if (_inputManager.JustPressed(Keys.OemPlus) || _inputManager.JustPressed(Keys.Add) || _inputManager.GetMouseScroll() > 0) {
+            m_Camera.Zoom += 0.3f;
+        }
     }
 
     private void _handleCameraMovement() {
