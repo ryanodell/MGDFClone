@@ -21,7 +21,8 @@ public class RegionTileGenerationScreen : ScreenBase {
     private float m_CurrentBlinkTimer = m_BlinkTime;
     private bool m_SelectorVisible = true;
     private int m_ShiftModifier = 8;
-    private Vector2 m_SelectorPosition => new Vector2(m_SelectedTile.Column * Globals.TILE_SIZE, m_SelectedTile.Row * Globals.TILE_SIZE);
+    //private Vector2 m_SelectorPosition => new Vector2(m_SelectedTile.Column * Globals.TILE_SIZE, m_SelectedTile.Row * Globals.TILE_SIZE);
+    private Vector2 m_SelectorPosition => new Vector2((m_SelectedTile.Column + (m_SelectedColSize / 2)) * Globals.TILE_SIZE, (m_SelectedTile.Row + (m_SelectedRowSize / 2)) * Globals.TILE_SIZE);
     public RegionTileGenerationScreen(GraphicsDeviceManager graphics, SpriteBatch spriteBatch, InputManager inputManager) : base(graphics, spriteBatch, inputManager) {
         m_Camera = new Camera2D(_graphics.GraphicsDevice);
         m_Camera.Zoom = 1.0f;
@@ -88,13 +89,39 @@ public class RegionTileGenerationScreen : ScreenBase {
             }
         }
         if (m_SelectorVisible) {
-            _spriteBatch.Draw(Globals.TEXTURE, m_SelectorPosition, SpriteSheetManager.GetSourceRectForSprite(eSprite.CapitalX), Color.Yellow);
+            //_spriteBatch.Draw(Globals.TEXTURE, m_SelectorPosition, SpriteSheetManager.GetSourceRectForSprite(eSprite.CapitalX), Color.Yellow);
+            for (int j = 0; j < m_SelectedRowSize; j++) {
+                for (int x = 0; x < m_SelectedColSize; x++) {
+                    var tmpPosition = new Vector2(m_SelectorPosition.X + (Globals.TILE_SIZE * x), m_SelectorPosition.Y + (Globals.TILE_SIZE * j));
+                    tmpPosition.X = m_SelectorPosition.X + (Globals.TILE_SIZE * x);
+                    _spriteBatch.Draw(Globals.TEXTURE, tmpPosition, SpriteSheetManager.GetSourceRectForSprite(eSprite.CapitalX), Color.Yellow);
+                }
+            }
         }
         _spriteBatch.End();
     }
 
     private void _handleSelector() {
         bool isSheftHeld = _inputManager.IsPressed(Keys.LeftShift) || _inputManager.IsPressed(Keys.RightShift);
+        if (_inputManager.JustReleased(Keys.J)) {
+            if (m_SelectedColSize - 1 > 0) {
+                m_SelectedColSize--;
+            }
+        }
+        if (_inputManager.JustReleased(Keys.L)) {
+            m_SelectedColSize++;
+        }
+
+        if (_inputManager.JustReleased(Keys.I)) {
+            if (m_SelectedRowSize - 1 > 0) {
+                m_SelectedRowSize--;
+            }
+        }
+        if (_inputManager.JustReleased(Keys.K)) {
+            m_SelectedRowSize++;
+        }
+
+
         if (_inputManager.JustReleased(Keys.D) || _inputManager.JustReleased(Keys.NumPad6)) {
             if (isSheftHeld) {
                 m_SelectedTile.Column += m_ShiftModifier;
